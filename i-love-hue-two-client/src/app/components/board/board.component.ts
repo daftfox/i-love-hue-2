@@ -4,7 +4,7 @@ import {
 } from '@angular/core';
 
 import * as d3 from 'd3';
-import { Tile } from '../../classes/tile.class';
+import { Tile } from '../../../../../i-love-hue-two-server/models/tile.class';
 
 @Component({
   selector: 'board',
@@ -16,16 +16,19 @@ import { Tile } from '../../classes/tile.class';
 
 export class BoardComponent implements OnInit, OnChanges {
   @Input() tiles: Tile[];
+  @Input() ownBoard: boolean;
+  @Input() gameOver: boolean;
   @Output() boardUpdated = new EventEmitter();
   @ViewChild('board') private boardContainer: ElementRef;
 
   private margin = {top: 0, bottom: 0, left: 0, right: 0};
-  private board:    any;
-  private width:    number;
-  private height:   number;
-  private tileSize: any;
-  private rows:     any;
-  private columns:  any;
+  private board:      any;
+  private immutables: any;
+  private width:      number;
+  private height:     number;
+  private tileSize:   any;
+  private rows:       any;
+  private columns:    any;
 
   private selectedTile1: string;
 
@@ -35,20 +38,20 @@ export class BoardComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.createBoard();
     if (this.tiles) {
-      this.updateBoard();
+      this.updateTiles();
     }
   }
 
-  ngOnChanges(changes) {
+  ngOnChanges(changes: any) {
     if (this.board) {
-      this.updateBoard();
+      this.updateTiles();
     }
   }
 
   createBoard() {
     let element   = this.boardContainer.nativeElement;
-    this.width    = element.offsetWidth - this.margin.left - this.margin.right;
-    this.height   = element.offsetHeight - this.margin.top - this.margin.bottom;
+    this.width    = Math.round(element.offsetWidth - this.margin.left - this.margin.right);
+    this.height   = Math.round(element.offsetHeight - this.margin.top - this.margin.bottom);
 
     this.rows     = d3.max(this.tiles, d => d.y);
     this.columns  = d3.max(this.tiles, d => d.x);
@@ -66,19 +69,25 @@ export class BoardComponent implements OnInit, OnChanges {
     this.board = svg.append('g')
       .attr('class', 'board')
       .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
+    this.immutables = svg.append('g')
+      .attr('class', 'immutables')
+      .attr('transform', `translate(${this.margin.left}, ${this.margin.top})`);
 
     let defs = svg.append('defs');
   }
 
-  updateBoard() {
-    let update = this.board.selectAll('.board')
+  updateTiles() {
+    let updateTiles = this.board.selectAll('.board')
       .data(this.tiles);
 
-    // remove existing tiles tiles
-    update.exit().remove();
+    let updateImmutables = this.immutables.selectAll('.immutables')
+      .data(this.tiles);
+
+    // clean up
+    this.board.selectAll('rect').remove();
 
     // add new tiles
-    update
+    updateTiles
       .enter()
       .append('rect')
       .attr('class', 'tile')
@@ -89,21 +98,35 @@ export class BoardComponent implements OnInit, OnChanges {
       .on('mouseover', this.handleMouseOver)
       // example of Lambda programming
       .on('mouseout', (d) => {
-        this.handleMouseOut(d, this.selectedTile1, event.target);
+        return this.handleMouseOut(d, this.selectedTile1, event.target);
       })
-      .on('click', (d) => {
-        this.selectedTile1 = this.handleClick(d, this.selectedTile1, event.target);
+      .on('click', (d) => {                       // don't allow the player to manipulate other boards
+        if (!d.immutable && this.ownBoard && !this.gameOver) {      // also don't allow immutable tiles to be swapped
+          this.selectedTile1 = this.handleClick(d, this.selectedTile1, event.target);
+        }
       })
       .style('fill', (d) => d.color);
+
+    // append little grey dot for immutable tiles
+    updateImmutables
+      .enter()
+      .append('circle')
+      .attr('cx', (d) => (d.x * this.tileSize.width) - this.tileSize.width / 2)
+      .attr('cy', (d) => (d.y * this.tileSize.height) - this.tileSize.width / 2)
+      .attr('r', (d) => (d.immutable ? this.tileSize.width / 10 : 0))
+      .style('fill', 'black');
   }
 
   private handleMouseOver(d, i) {
-    d3.select(this).style('stroke', 'lightgrey');
-    d3.select(this).style('stroke-width', '1');
+    if (!d.immutable && !this.gameOver) {
+      d3.select(this).style('stroke', 'lightgrey');
+      d3.select(this).style('stroke-width', '2');
+      d3.select(this).style('stroke-alignment', 'inner');
+    }
   }
 
   private handleMouseOut(d, selectedTile, target) {
-    if (d.id != selectedTile) {
+    if (d.id != selectedTile && !d.immutable && !this.gameOver) {
       d3.select(target).style('stroke', 'none');
     }
   }
@@ -112,7 +135,7 @@ export class BoardComponent implements OnInit, OnChanges {
     let tile = d3.select(target);
     if (!selectedTile) {
       tile.style('stroke', 'darkgrey')
-        .style('stroke-width', '1');
+        .style('stroke-width', '2');
       return d.id;
     } else if ((selectedTile && selectedTile === d.id)) {
       d3.selectAll('.tile')
@@ -121,7 +144,7 @@ export class BoardComponent implements OnInit, OnChanges {
     } else {
       d3.selectAll('.tile')
         .style('stroke', 'none');
-      this.boardUpdated.emit({tile1: selectedTile, tile2: d.id});
+      this.boardUpdated.emit({from: selectedTile, to: d.id});
       return null;
     }
   }

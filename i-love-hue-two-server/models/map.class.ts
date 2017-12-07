@@ -10,6 +10,7 @@ export class Map {
     private colorBottomRight:     string;
     
     public  tiles:                Tile[];
+    public  solution:             Tile[];
     private gradientMap:          Array<any>;
 
     constructor(rows:             number,
@@ -47,13 +48,22 @@ export class Map {
         map[0] = this.generateGradientRow(this.colorTopLeft, this.colorTopRight);
         map[this.rows - 1] = this.generateGradientRow(this.colorBottomLeft, this.colorBottomRight);
 
-
         // fill remaining rows
         this.gradientMap = this.fillEmptyRows(map);
     }
 
     private generateGradientRow(color1: string, color2: string): any {
         return tinygradient(color1, color2).rgb(this.columns);
+    }
+
+    public checkSolution(tiles: Tile[]): boolean {
+        for (let i = 0; i < tiles.length; i++) {
+            if ((tiles[i].x !== this.solution[i].x) ||
+                (tiles[i].y !== this.solution[i].y)) {
+                return false;
+            }
+        }
+        return true; // we have a winner!
     }
 
     private fillEmptyRows(map: Array<Array<any>>): any {
@@ -99,6 +109,10 @@ export class Map {
 
     private setColor(x: number, y: number): string {
         return this.pickColorFromGradientMap(x, y);
+    }
+
+    public setSolution(solution: Tile[]): void {
+        this.solution = solution;
     }
 
     private pickColorFromGradientMap(x: number, y: number): string {

@@ -17,9 +17,9 @@ class Map {
     }
     generateTiles() {
         this.tiles = [];
-        for (let i = 1; i <= this.rows; i++) {
-            for (let j = 1; j <= this.columns; j++) {
-                let tile = new tile_class_1.Tile(tile_class_1.Tile.generateId(), i, j, this.setColor(i, j));
+        for (let y = 1; y <= this.rows; y++) {
+            for (let x = 1; x <= this.columns; x++) {
+                let tile = new tile_class_1.Tile(tile_class_1.Tile.generateId(), y, x, this.setColor(y, x));
                 this.tiles.push(tile);
             }
         }
@@ -34,6 +34,15 @@ class Map {
     }
     generateGradientRow(color1, color2) {
         return tinygradient(color1, color2).rgb(this.columns);
+    }
+    checkSolution(tiles) {
+        for (let i = 0; i < tiles.length; i++) {
+            if ((tiles[i].x !== this.solution[i].x) ||
+                (tiles[i].y !== this.solution[i].y)) {
+                return false;
+            }
+        }
+        return true; // we have a winner!
     }
     fillEmptyRows(map) {
         /*
@@ -73,6 +82,9 @@ class Map {
     }
     setColor(x, y) {
         return this.pickColorFromGradientMap(x, y);
+    }
+    setSolution(solution) {
+        this.solution = solution;
     }
     pickColorFromGradientMap(x, y) {
         return this.gradientMap[y - 1][x - 1].toHexString();

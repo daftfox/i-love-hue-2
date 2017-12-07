@@ -2,17 +2,38 @@ import * as WebSocket from 'ws';
 import { Tile } from './tile.class';
 
 export class Client {
-    id:        string;
-    webSocket: WebSocket;
-    tiles:     Tile[];
+    id:         string;
+    name?:       string;
+    tiles:      Tile[];
+    isReady:    boolean;
+    score:      number;
+    webSocket?: WebSocket;
 
-    constructor(id: string, webSocket: WebSocket) {
+    constructor(id: string, name?: string, webSocket?: WebSocket) {
         this.id = id;
-        this.webSocket = webSocket;
+        this.name = name;
+        this.score = 0;
+        this.isReady = false;
+        if (webSocket) {
+            this.webSocket = webSocket;
+        }
+    }
+
+    public toggleReady(): void {
+        this.isReady = !this.isReady;
+    }
+
+    public incrementScore(): void {
+        this.score++;
     }
 
     public setTiles(tiles: Tile[]): void {
         this.tiles = tiles;
+    }
+
+    public setName(name: string): Client {
+        this.name = name;
+        return this;
     }
 
     public swapTiles(tileSwap: any): void {

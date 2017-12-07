@@ -6,11 +6,13 @@ import { HttpModule } from '@angular/http';
 import { BoardComponent } from './components/board/board.component';
 
 import { AppComponent } from './app.component';
+import { PlayFieldComponent } from './components/play-field/play-field.component';
 
 @NgModule({
   declarations: [
     AppComponent,
-    BoardComponent
+    BoardComponent,
+    PlayFieldComponent
   ],
   imports: [
     BrowserModule,

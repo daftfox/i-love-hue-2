@@ -1,10 +1,10 @@
 
 export class Tile {
-  id:        string;
-  x:         number;
-  y:         number;
-  color:     string;
-  immutable: boolean;
+  public id:        string;
+  public x:         number;
+  public y:         number;
+  public color:     string;
+  public immutable: boolean;
 
   constructor(id: string, x: number, y: number, color: string) {
     this.id        = id;
@@ -16,7 +16,7 @@ export class Tile {
 
   public setImmutable(): void {
     this.immutable = true;
-}
+  }
 
   public static generateId(): string {
     let text  = "";

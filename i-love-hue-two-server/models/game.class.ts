@@ -3,7 +3,7 @@ import { setInterval } from 'timers';
 import { WebsocketService } from '../services/websocket.service';
 import { Client } from './client.class';
 import { Tile } from './tile.class';
-import {ImmutableMask} from "../../i-love-hue-two-client/src/app/classes/immutable-mask.class";
+import { ImmutableMask } from "./immutable-mask.class";
 
 export class GameMode {
     rows:    number;
@@ -24,6 +24,7 @@ export class Game {
     time:             number;
     clock:            any;
     websocketService: WebsocketService;
+    im:               ImmutableMask;
 
     public static GAMEMODE = [
         new GameMode(8, 8),             // easy
@@ -39,29 +40,35 @@ export class Game {
 
     constructor(mode:             number,
                 name:             string,
-                websocketService: WebsocketService) {
-        this.name = name;
+                websocketService: WebsocketService,
+                difficulty:       number) {
+
+        this.name = name || 'Game'+ImmutableMask.rng(0, 99);
         this.mode = Game.GAMEMODE[mode];
+        this.im = new ImmutableMask(this.mode.rows, this.mode.columns, difficulty);
         this.websocketService = websocketService;
         this.map  = new Map(
             this.mode.rows,
             this.mode.columns,
-            ...Game.COLORSETS[0]
+            ...Game.COLORSETS[ImmutableMask.rng(0, Game.COLORSETS.length - 1)]
         );
         this.state = 'ready';
     }
 
-    public initiate(): void {
+    public initiate(callback: any): void {
         this.state = 'initiated';
         this.startClock();
 
-        let tiles = ImmutableMask.maskTiles(this.tiles);
-        //tiles = this.scrambleTiles(tiles);
+        let tiles = this.im.maskTiles(this.map.tiles);
 
+        // this is the solution, keep it safe you hear!
+        this.map.setSolution(tiles);
 
         for (let client of this.clients) {
-            client.setTiles(tiles);
+            client.setTiles(this.im.scrambleTiles(tiles));
         }
+
+        callback();
     }
 
     public startClock(): void {
@@ -75,27 +82,23 @@ export class Game {
         this.clock();
     }
 
-    private scrambleTiles(input: Tile[]): Tile[] {
-        let tiles = input;
-
-        return tiles;
-    }
-
-    private applyImmutableMask(input: Tile[]): Tile[] {
-        let tiles = input;
-        return tiles;
-    }
-
-    public swapTiles(clientId: string, tileSwap: any): void {
+    public swapTiles(clientId: string, tileSwap: any, playerVictory: any): void {
         let client = this.getClient(clientId);
         client.swapTiles(tileSwap);
+        playerVictory(this.map.checkSolution(client.tiles));
     }
 
-    private getClient(clientId: string): Client {
+    public getClient(clientId: string): Client {
         return <Client> this.clients.find((client) => client.id === clientId);
     }
 
-    public addClient(client: string): void {
-        this.clients.push(this.websocketService.getClient(client));
+    public getAllClients(): Client[] {
+        return this.clients;
+    }
+
+    public addClient(clientId: string, clientName: string): void {
+        let client = this.websocketService.getClient(clientId);
+        client.setName(clientName);
+        this.clients.push(client);
     }
 }

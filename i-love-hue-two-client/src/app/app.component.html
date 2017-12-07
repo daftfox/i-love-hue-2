@@ -10,14 +10,147 @@
              *ngSwitchCase="'splash'">
           <div class="row justify-content-center">
             <div class="title col-auto">
-              <h1>I <span class="heart tone">&#9825;</span> HUE <span class="tone">2</span></h1>
+              <h1>I <span class="heart peach">&#9825;</span> HUE <span class="peach">2</span></h1>
+              <h2 class="peach d-flex justify-content-around">
+                <span>M</span>
+                <span>U</span>
+                <span>L</span>
+                <span>T</span>
+                <span>I</span>
+                <span>P</span>
+                <span>L</span>
+                <span>A</span>
+                <span>Y</span>
+                <span>E</span>
+                <span>R</span>
+              </h2>
             </div>
           </div>
           <div class="row justify-content-center">
-            <div class="col-auto">
+            <div class="col-6 text-right m-t-1">
+              <label for="url">Server url: <small>(optional)</small></label>
+            </div>
+            <div class="col-6 m-t-1">
+              <input id="url" type="text" #customUrl />
+            </div>
+
+            <div class="col-6 text-right m-t-1">
+              <label for="player-name">Player name: <small>(required)</small></label>
+            </div>
+            <div class="col-6 m-t-1">
+              <input id="player-name" type="text" #playerName />
+            </div>
+
+            <div class="col-12 text-center m-t-1">
               <button class="btn btn-lg btn-outline-primary"
-                      (click)="switchState('play')">
+                      [ngClass]="{'disabled': !playerName.value}"
+                      (click)="connectToGame(playerName.value, customUrl.value)"
+                      [disabled]="!playerName.value">
+                <span>Connect</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="'game-select'"
+             class="game-select">
+          <div class="row justify-content-center">
+            <div class="title col-auto">
+              <h1>I <span class="heart peach">&#9825;</span> HUE <span class="peach">2</span></h1>
+              <h2 class="peach d-flex justify-content-around">
+                <span>M</span>
+                <span>U</span>
+                <span>L</span>
+                <span>T</span>
+                <span>I</span>
+                <span>P</span>
+                <span>L</span>
+                <span>A</span>
+                <span>Y</span>
+                <span>E</span>
+                <span>R</span>
+              </h2>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 text-center m-t-3">
+              <label for="game-name">Game name: <small>(optional)</small></label>
+              <input id="game-name" class="" type="text" #gameName />
+            </div>
+
+            <div class="col-12 text-center m-t-3">
+              <span>Game difficulty: </span>
+              <input class="" type="radio" value="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
+              <input class="" type="radio" value="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
+              <input class="" type="radio" value="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
+            </div>
+
+            <div class="col-12 text-center m-t-3">
+              <span>Board size: </span>
+              <input class="" type="radio" value="0" name="mode" [(ngModel)]="mode" /> 8x8
+              <input class="" type="radio" value="1" name="mode" [(ngModel)]="mode" /> 10x10
+              <input class="" type="radio" value="2" name="mode" [(ngModel)]="mode" /> 15x15
+            </div>
+
+            <div class="col-12 text-center m-t-3">
+              <button class="btn btn-lg btn-outline-primary"
+                      [ngClass]="{'disabled': !difficulty || !mode}"
+                      (click)="newGame(gameName.value, difficulty, mode)"
+                      [disabled]="!difficulty">
                 <span>New game</span>
+              </button>
+            </div>
+
+            <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
+              <span>Game: <small>(select one to join)</small></span>
+              <select>
+                <option value="game" *ngFor="let game of games">{{game}}</option>
+              </select>
+            </div>
+            <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
+              <button class="btn btn-lg btn-outline-primary"
+                      (click)="joinGame()">
+                <span>Join game</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="'lobby'"
+             class="lobby">
+          <div class="row justify-content-center">
+            <div class="title col-auto">
+              <h1>I <span class="heart peach">&#9825;</span> HUE <span class="peach">2</span></h1>
+              <h2 class="peach d-flex justify-content-around">
+                <span>M</span>
+                <span>U</span>
+                <span>L</span>
+                <span>T</span>
+                <span>I</span>
+                <span>P</span>
+                <span>L</span>
+                <span>A</span>
+                <span>Y</span>
+                <span>E</span>
+                <span>R</span>
+              </h2>
+            </div>
+          </div>
+          <div class="row">
+            <div class="col-12 text-center">
+              <button class="btn btn-lg btn-outline-primary"
+                      [ngClass]="{'ready': isReady()}"
+                      (click)="toggleSelfReady()">
+                <span>Ready</span>
+              </button>
+            </div>
+
+            <div class="col-12 text-center m-t-1">
+              <button class="btn btn-lg btn-outline-primary"
+                      [ngClass]="{'disabled': !canStartGame()}"
+                      (click)="canStartGame() && startGame()"
+                      [disabled]="!canStartGame()">
+                <span>Start game</span>
               </button>
             </div>
           </div>
@@ -25,35 +158,48 @@
 
         <div *ngSwitchCase="'play'"
              class="play-screen">
-          <div class="row">
-            <div class="field" *ngIf="gradientMap">
-              <board [tiles]="gradientMap.tiles" (boardUpdated)="playerAction($event)"></board>
-              <!--<div class="row"
-                   *ngFor="let row of rows">
-                <div class="col"
-                     *ngFor="let col of row">
-                  {{col}}
-                </div>
-              </div>-->
-            </div>
+          <div [ngClass]="{'celebrations': celebrations}"
+               class="celebration-panel">
+            <span *ngIf="celebrations === 'win'">You win!</span>
+            <span *ngIf="celebrations === 'lose'" class="peach">You lose!</span>
           </div>
-          <div class="row">
-            <div class="info">
-              <div class="player-name">
-                <span>Player: Henk de Vries</span>
-              </div>
-              <div class="player-score">
-                <span>Score: 3</span>
-              </div>
-            </div>
-          </div>
+          <play-field [ownBoard]="true"
+                      [player]="self"
+                      [gameOver]="gameOver()"
+                      (boardUpdated)="tileSwap(self, $event)"></play-field>
         </div>
       </div>
     </div>
 
 
-    <div id="lobby" class="col-lg-3 col-12">
-      <!--<ilh2-lobby ></ilh2-lobby>-->
+    <div id="lobby"
+         class="col-lg-3 col-12">
+      <div class="row"
+           *ngIf="state === 'lobby'">
+        <div class="row"
+             *ngFor="let player of players">
+          <div class="info"
+               *ngIf="player.id !== self.id">
+            <div class="player-name">
+              <span [ngClass]="{'green': player.isReady, 'peach': !player.isReady}">Player: {{player.name}}</span>
+            </div>
+            <div class="player-score">
+              <span>Score: {{player.score}}</span>
+            </div>
+          </div>
+        </div>
+      </div>
+      <div *ngIf="state === 'play'">
+        <div class="row"
+             *ngFor="let player of players">
+          <div *ngIf="player.id !== self.id"
+               class="mini-field">
+            <play-field [ownBoard]="false"
+                        [gameOver]="gameOver()"
+                        [player]="player"></play-field>
+          </div>
+        </div>
+      </div>
     </div>
   </div>
 </div>

@@ -1,5 +1,6 @@
-$peach:       #ff6358;
-$gray:        #bdbdbd;
+$peach: #ff6358;
+$gray:  #bdbdbd;
+$green: #73C92B;
 
 body.dark-background {
   background-color: #f0ebd8;
@@ -7,6 +8,30 @@ body.dark-background {
 
 .row {
   margin: 0!important;
+}
+
+.m-t-1 {
+  margin-top: 10px;
+}
+.m-t-3 {
+  margin-top: 30px;
+}
+
+.green {
+  color: $green!important;
+}
+
+.peach {
+  color: $peach;
+}
+
+input {
+  border-radius: 3px;
+  border-width: 1px;
+
+  &:focus {
+    outline-color: $peach;
+  }
 }
 
 #particles-js{
@@ -24,60 +49,108 @@ body.dark-background {
   &:hover{
     background-color: $peach!important;
     color: white!important;
+
+    &.disabled {
+      color: white!important;
+      background-color: darkgrey!important;
+    }
+  }
+
+  &.disabled {
+    color: darkgrey!important;
+    border-color: darkgrey!important;
+  }
+
+  &.ready {
+    border-color: $green!important;
+    color: $green!important;
+
+    &:hover{
+      background-color: $green!important;
+      color: white!important;
+    }
   }
 }
 
-.splash-screen {
-  margin-top: 25vh;
+.title{
+  h1 {
+    margin-top: 25vh;
+    color: #444444;
+    font-size: 6em!important;
+  }
 
-  .title{
-    h1 {
-      color: #444444;
-      font-size: 6em!important;
-    }
-
-    .tone {
-      color: #ff6358;
-    }
-
-    .heart {
-      font-weight: bolder;
-      font-size: 1.1em;
-    }
+  .heart {
+    font-weight: bolder;
+    font-size: 1.1em;
   }
 }
+
 
 .play-screen {
-  //background-color: red;
   height: 100vh;
+
+  .celebration-panel {
+    position: absolute;
+    height: 100%;
+    width: 100%;
+    opacity: 0;
+    transition-duration: 1s;
+    text-align: center;
+    padding-top: 50%;
+    pointer-events: none;
+
+
+    span {
+      font-size: 72px;
+      color: white;
+      text-shadow: 0 0 20px white;
+
+      &.peach{
+        color: $peach;
+      }
+    }
+
+    &.celebrations {
+      opacity: 1;
+    }
+  }
 
   .field {
     width: 75vh;
     height: 85vh;
     margin: 5vh auto 0;
-
-    //background-color: blue;
-
-    /*.row {
-      height: 10%;
-
-      .col {
-        height: 100%;
-        padding: 0;
-        border: 0.5px lightgray solid;
-
-        &:hover {
-          //color: ;
-        }
-      }
-    }*/
   }
 
   .info {
     width: 75vh;
     margin: 10px auto 0!important;
 
-    background-color: green;
+    .player-name,
+    .player-score {
+      display: inline;
+      width: 50%;
+    }
+
+    .player-score {
+      text-align: right;
+      float: right;
+    }
+  }
+}
+
+#lobby{
+  .row {
+    width: 90%;
+  }
+  .field {
+    width: 250px;
+    height: 250px;
+    margin: 10px auto 0;
+  }
+
+  .info {
+    width: 100%;
+    margin: 10px auto 0!important;
 
     .player-name,
     .player-score {

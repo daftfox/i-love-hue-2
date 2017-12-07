@@ -1,12 +1,15 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
 class Tile {
-    // todo: make tile optionally immutable to create areas of the playing field that will remain static
     constructor(id, x, y, color) {
         this.id = id;
         this.x = x;
         this.y = y;
         this.color = color;
+        this.immutable = false;
+    }
+    setImmutable() {
+        this.immutable = true;
     }
     static generateId() {
         let text = "";
