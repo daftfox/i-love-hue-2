@@ -1,0 +1,1 @@
+{"version":3,"file":"game.controller.js","sourceRoot":"","sources":["../../../controllers/main.controller.ts"],"names":[],"mappings":";;AAAA,qEAAiE;AAGjE;IAGI,YAAY,eAAuB;QAC/B,OAAO,CAAC,GAAG,CAAC,iBAAiB,CAAC,CAAC;QAC/B,IAAI,CAAC,gBAAgB,GAAG,IAAI,oCAAgB,CAAC,eAAe,CAAC,CAAC;IAClE,CAAC;CACJ;AAPD,wCAOC"}

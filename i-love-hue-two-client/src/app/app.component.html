@@ -1,0 +1,59 @@
+<div id="particles-js"></div>
+
+<div class="wrapper">
+  <div class="row justify-content-end">
+    <div id="main-field"
+         class="col-12"
+         [ngClass]="{'col-lg-6': state === 'splash', 'col-lg-9': state === 'play'}">
+      <div [ngSwitch]="state">
+        <div class="splash-screen"
+             *ngSwitchCase="'splash'">
+          <div class="row justify-content-center">
+            <div class="title col-auto">
+              <h1>I <span class="heart tone">&#9825;</span> HUE <span class="tone">2</span></h1>
+            </div>
+          </div>
+          <div class="row justify-content-center">
+            <div class="col-auto">
+              <button class="btn btn-lg btn-outline-primary"
+                      (click)="switchState('play')">
+                <span>New game</span>
+              </button>
+            </div>
+          </div>
+        </div>
+
+        <div *ngSwitchCase="'play'"
+             class="play-screen">
+          <div class="row">
+            <div class="field" *ngIf="gradientMap">
+              <board [tiles]="gradientMap.tiles" (boardUpdated)="playerAction($event)"></board>
+              <!--<div class="row"
+                   *ngFor="let row of rows">
+                <div class="col"
+                     *ngFor="let col of row">
+                  {{col}}
+                </div>
+              </div>-->
+            </div>
+          </div>
+          <div class="row">
+            <div class="info">
+              <div class="player-name">
+                <span>Player: Henk de Vries</span>
+              </div>
+              <div class="player-score">
+                <span>Score: 3</span>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+
+
+    <div id="lobby" class="col-lg-3 col-12">
+      <!--<ilh2-lobby ></ilh2-lobby>-->
+    </div>
+  </div>
+</div>
