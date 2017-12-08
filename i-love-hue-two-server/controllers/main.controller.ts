@@ -137,7 +137,7 @@ export class MainController {
                         "client_score": winner.score
                     }
                 );
-                setTimeout(this.newRound, 15000);
+                setTimeout(this.newRound.bind(this), 15000);
             }
         });
         /*for (let client of this.game.getAllClients()) {
