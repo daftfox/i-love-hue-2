@@ -13,7 +13,7 @@ class Tile {
     }
     static generateId() {
         let text = "";
-        let range = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
+        let range = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz";
         for (let i = 0; i < 5; i++) {
             text += range.charAt(Math.floor(Math.random() * range.length));
         }

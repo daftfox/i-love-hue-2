@@ -5,6 +5,7 @@ class Client {
         this.id = id;
         this.name = name;
         this.score = 0;
+        this.tileSwaps = 0;
         this.isReady = false;
         if (webSocket) {
             this.webSocket = webSocket;
@@ -38,6 +39,7 @@ class Client {
         tilesCopy[tile2Index].y = this.tiles[tile1Index].y;
         // reassign tiles. changes object reference, thus triggering the board's onChange() method
         this.tiles = tilesCopy;
+        this.tileSwaps++;
     }
     static generateId() {
         let text = "";

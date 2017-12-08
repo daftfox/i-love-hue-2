@@ -504,7 +504,6 @@ var pJS = function(tag_id, params){
   };
 
   pJS.fn.particlesUpdate = function(){
-
     for(var i = 0; i < pJS.particles.array.length; i++){
 
       /* the particle */

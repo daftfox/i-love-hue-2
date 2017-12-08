@@ -21,13 +21,14 @@ export class BoardComponent implements OnInit, OnChanges {
   @ViewChild('board') private boardContainer: ElementRef;
 
   private margin = {top: 0, bottom: 0, left: 0, right: 0};
-  private board:      any;
-  private immutables: any;
-  private width:      number;
-  private height:     number;
-  private tileSize:   any;
-  private rows:       any;
-  private columns:    any;
+  private board:        any;
+  private immutables:   any;
+  private width:        number;
+  private height:       number;
+  private tileSize:     any;
+  private rows:         any;
+  private columns:      any;
+  private swappedTiles: any;
 
   private selectedTile1: string;
 
@@ -37,13 +38,17 @@ export class BoardComponent implements OnInit, OnChanges {
   ngOnInit() {
     this.createBoard();
     if (this.tiles) {
-      this.updateTiles();
+      this.addTiles();
     }
   }
 
   ngOnChanges(changes: any) {
-    if (this.board) {
-      this.updateTiles();
+    if (changes && changes.tiles) {
+      if (this.board && !changes.tiles.previousValue) {
+        this.addTiles();
+      } else if (this.board) {
+        this.updateTiles();
+      }
     }
   }
 
@@ -76,26 +81,59 @@ export class BoardComponent implements OnInit, OnChanges {
   }
 
   updateTiles() {
-    let updateTiles = this.board.selectAll('.board')
-      .data(this.tiles);
+    let data = this.tiles.filter((tile) => (tile.id === this.swappedTiles.from || tile.id === this.swappedTiles.to));
+    let reverseData = [
+      {x: data[1].x, y: data[1].y},
+      {x: data[0].x, y: data[0].y}
+    ];
 
-    let updateImmutables = this.immutables.selectAll('.immutables')
-      .data(this.tiles);
+    let tiles = this.board.selectAll('.board')
+      .data(data);
 
-    // clean up
-    this.board.selectAll('rect').remove();
+    this.board.selectAll(`rect.${this.swappedTiles.from}`).remove();
+    this.board.selectAll(`rect.${this.swappedTiles.to}`).remove();
 
-    // add new tiles
-    updateTiles
+    //this.drawTiles(tiles);
+
+    tiles
       .enter()
       .append('rect')
-      .attr('class', 'tile')
+      .attr('class', (d) => d.id)
+      .attr('x', (d, i) => (reverseData[i].x * this.tileSize.width) - this.tileSize.width)
+      .attr('y', (d, i) => (reverseData[i].y * this.tileSize.height) - this.tileSize.height)
+      .attr('width', this.tileSize.width)
+      .attr('height', this.tileSize.height)
+      .on('mouseover', (d) => {
+        return this.handleMouseOver(d);
+      })
+      .on('mouseout', (d) => {
+        return this.handleMouseOut(d, this.selectedTile1, event.target);
+      })
+      .on('click', (d) => {                                         // don't allow the player to manipulate other boards
+        if (!d.immutable && this.ownBoard && !this.gameOver) {      // also don't allow immutable tiles to be swapped
+          this.selectedTile1 = this.handleClick(d, this.selectedTile1, event.target);
+        }
+      })
+      .style('fill', (d) => d.color)
+      .transition()
+      .delay(50)
+      .duration(500)
+      .attr('x', d => (d.x * this.tileSize.width) - this.tileSize.width)
+      .attr('y', d => (d.y * this.tileSize.height) - this.tileSize.height);
+  }
+
+  drawTiles(tiles: any) {
+    tiles
+      .enter()
+      .append('rect')
+      .attr('class', (d) => d.id)
       .attr('x', d => ((d.x * this.tileSize.width) - this.tileSize.width) + this.tileSize.width / 2)
       .attr('y', d => ((d.y * this.tileSize.height) - this.tileSize.height) + this.tileSize.height / 2)
       .attr('width', 0)
       .attr('height', 0)
-
-      .on('mouseover', this.handleMouseOver)
+      .on('mouseover', (d) => {
+        return this.handleMouseOver(d);
+      })
       .on('mouseout', (d) => {
         return this.handleMouseOut(d, this.selectedTile1, event.target);
       })
@@ -112,9 +150,10 @@ export class BoardComponent implements OnInit, OnChanges {
       .attr('y', d => (d.y * this.tileSize.height) - this.tileSize.height)
       .attr('width', this.tileSize.width)
       .attr('height', this.tileSize.height);
+  }
 
-    // append little black dot for immutable tiles
-    updateImmutables
+  drawImmutables(immutables: any) {
+    immutables
       .enter()
       .append('circle')
       .attr('cx', (d) => (d.x * this.tileSize.width) - this.tileSize.width / 2)
@@ -128,7 +167,24 @@ export class BoardComponent implements OnInit, OnChanges {
       .style('fill-opacity', 1);
   }
 
-  private handleMouseOver(d, i) {
+  addTiles() {
+    let tiles = this.board.selectAll('.board')
+      .data(this.tiles);
+
+    let updateImmutables = this.immutables.selectAll('.immutables')
+      .data(this.tiles);
+
+    // clean up
+    this.board.selectAll('rect').remove();
+
+    // add new tiles
+    this.drawTiles(tiles);
+
+    // append little black dot for immutable tiles
+    this.drawImmutables(updateImmutables);
+  }
+
+  private handleMouseOver(d) {
     if (!d.immutable && !this.gameOver) {
       d3.select(this).style('stroke', 'lightgrey');
       d3.select(this).style('stroke-width', '2');
@@ -155,7 +211,8 @@ export class BoardComponent implements OnInit, OnChanges {
     } else {
       d3.selectAll('.tile')
         .style('stroke', 'none');
-      this.boardUpdated.emit({from: selectedTile, to: d.id});
+      this.swappedTiles = {from: selectedTile, to: d.id};
+      this.boardUpdated.emit(this.swappedTiles);
       return null;
     }
   }

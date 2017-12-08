@@ -3,8 +3,9 @@ import { Tile } from './tile.class';
 
 export class Client {
     id:         string;
-    name?:       string;
+    name?:      string;
     tiles:      Tile[];
+    tileSwaps:  number;
     isReady:    boolean;
     score:      number;
     webSocket?: WebSocket;
@@ -13,6 +14,7 @@ export class Client {
         this.id = id;
         this.name = name;
         this.score = 0;
+        this.tileSwaps = 0;
         this.isReady = false;
         if (webSocket) {
             this.webSocket = webSocket;
@@ -54,6 +56,7 @@ export class Client {
 
         // reassign tiles. changes object reference, thus triggering the board's onChange() method
         this.tiles = tilesCopy;
+        this.tileSwaps++;
     }
 
     public static generateId(): string {

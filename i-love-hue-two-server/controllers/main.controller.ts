@@ -108,6 +108,7 @@ export class MainController {
                         {
                             "event": "player_tile_swap",
                             "client_id": message.client_id,
+                            "tile_swaps": message.tile_swaps,
                             "tile_swap": {
                                 "from": message.tile_swap.from,
                                 "to": message.tile_swap.to
@@ -117,10 +118,13 @@ export class MainController {
                 }
             }
             if (playerVictory) {
+                let winner = this.game.getClient(message.client_id);
+                winner.incrementScore();
                 this.websocketService.broadcastMessage(
                     {
                         "event": "player_win",
-                        "client_id": message.client_id
+                        "client_id": message.client_id,
+                        "client_score": winner.score
                     }
                 );
             }
@@ -155,7 +159,7 @@ export class MainController {
     private startNewGame(message: any): void {
         // create a new game
         this.game = new Game(message.game.mode, message.game.name, this.websocketService, message.game.difficulty);
-        this.websocketService.games.push(this.game);
+        this.websocketService.games = [this.game];
         console.log(`Game ${this.game.name} started!`);
 
         // add this client to the game

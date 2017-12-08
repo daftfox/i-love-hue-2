@@ -21,7 +21,6 @@ export class AppComponent implements OnInit {
   mode: number;
   celebrations: string;
 
-
   constructor(){
     this.state = 'splash';
   }
@@ -45,7 +44,6 @@ export class AppComponent implements OnInit {
           } else {
             let newPlayer = new Client(message.client_id, message.client_name);
             newPlayer.setTiles(message.client_tiles);
-            console.log(message.client_tiles);
             this.players.push(newPlayer);
           }
           break;
@@ -62,19 +60,15 @@ export class AppComponent implements OnInit {
           this.tileSwap(this.players.find((player) => player.id === message.client_id), message.tile_swap);
           break;
         case 'player_win':
-          if (message.client_id === this.self.id) this.celebrate();
-          else this.lose();
+          this.endGame(message);
           break;
       }
     });
   }
 
-  celebrate(): void {
-    this.celebrations = 'win';
-  }
-
-  lose(): void {
-    this.celebrations = 'lose';
+  endGame(message: any): void {
+    this.celebrations = (message.client_id === this.self.id ? 'win' : 'lose');
+    this.players.find((player) => player.id === message.client_id).incrementScore();
   }
 
   newGame(name: string, difficulty: number, mode: number): void {
@@ -167,12 +161,14 @@ export class AppComponent implements OnInit {
 
     // reassign tiles. changes object reference, thus triggering the board's onChange() method
     player.setTiles(tilesCopy);
+    player.tileSwaps++;
     if (this.self.id === player.id) {
       this.sendMessage(
         {
           event: "player_tile_swap",
           client_id: this.self.id,
-          tile_swap: tileSwap
+          tile_swap: tileSwap,
+          tile_swaps: player.tileSwaps
         }
       );
     }

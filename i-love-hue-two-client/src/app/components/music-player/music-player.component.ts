@@ -1,4 +1,5 @@
 import { Component } from '@angular/core';
+import {ImmutableMask} from "../../../../../i-love-hue-two-server/models/immutable-mask.class";
 
 @Component({
   selector: 'music-player',
@@ -21,11 +22,11 @@ export class MusicPlayerComponent {
 
   constructor() {
     this.soundTrack = new Audio();
-    this.soundTrack.src = `./assets/sound-tracks/${this.soundTracks[0]}`;
+    this.currentTrack = ImmutableMask.rng(0, this.soundTracks.length);
+    this.soundTrack.src = `./assets/sound-tracks/${this.soundTracks[this.currentTrack]}`;
     this.soundTrack.load();
     this.soundTrack.play();
     this.play = true;
-    this.currentTrack = 0;
 
     this.soundTrack.addEventListener('ended', this.nextSong.bind(this));
   }

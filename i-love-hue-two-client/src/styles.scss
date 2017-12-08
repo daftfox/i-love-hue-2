@@ -97,7 +97,7 @@ input {
     opacity: 0;
     transition-duration: 1s;
     text-align: center;
-    padding-top: 50%;
+    padding-top: 30%;
     pointer-events: none;
 
 
@@ -127,9 +127,15 @@ input {
     margin: 10px auto 0!important;
 
     .player-name,
-    .player-score {
-      display: inline;
-      width: 50%;
+    .player-score,
+    .player-swaps {
+      font-size: 28px;
+      display: inline-block;
+      width: 33%;
+    }
+
+    .player-swaps {
+      text-align: center;
     }
 
     .player-score {
@@ -154,9 +160,11 @@ input {
     margin: 10px auto 0!important;
 
     .player-name,
-    .player-score {
+    .player-score,
+    .player-swaps {
+      font-size: 28px;
       display: inline;
-      width: 50%;
+      width: 33%;
     }
 
     .player-score {
