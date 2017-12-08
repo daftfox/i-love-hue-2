@@ -22,7 +22,7 @@ export class MusicPlayerComponent {
 
   constructor() {
     this.soundTrack = new Audio();
-    this.currentTrack = ImmutableMask.rng(0, this.soundTracks.length);
+    this.currentTrack = ImmutableMask.rng(0, this.soundTracks.length - 1);
     this.soundTrack.src = `./assets/sound-tracks/${this.soundTracks[this.currentTrack]}`;
     this.soundTrack.load();
     this.soundTrack.play();

@@ -40,9 +40,7 @@ export class MainController {
     private playerReady(message: any): void {
         let clients = this.game.getAllClients();
         let client = this.game.getClient(message.client_id);
-        //console.log(client.isReady);
         client.toggleReady();
-        //console.log(client.isReady);
         for (let client of clients) {
             this.websocketService.sendMessageToClient(
                 client.id,
@@ -58,7 +56,6 @@ export class MainController {
         this.game.addClient(message.client_id, message.client_name);
         let clients = this.game.getAllClients();
         let newPlayer = this.game.getClient(message.client_id);
-        console.log(newPlayer.tiles);
         for (let client of clients) {
 
             // send new player a list of all players already in the lobby
@@ -99,6 +96,18 @@ export class MainController {
         });
     }
 
+    private newRound(): void {
+        this.game.newRound(() => {
+            let clients = this.game.getAllClients().map((c) => {return {id: c.id, tiles: c.tiles}});
+            this.websocketService.broadcastMessage(
+                {
+                    "event": "initiate_game",
+                    "players": clients
+                }
+            );
+        });
+    }
+
     private playerTileSwap(message: any): void {
         this.game.swapTiles(message.client_id, message.tile_swap, (playerVictory: boolean) => {
             for (let client of this.game.getAllClients()) {
@@ -119,6 +128,7 @@ export class MainController {
             }
             if (playerVictory) {
                 let winner = this.game.getClient(message.client_id);
+                this.game.stopClock();
                 winner.incrementScore();
                 this.websocketService.broadcastMessage(
                     {
@@ -127,6 +137,7 @@ export class MainController {
                         "client_score": winner.score
                     }
                 );
+                setTimeout(this.newRound, 15000);
             }
         });
         for (let client of this.game.getAllClients()) {

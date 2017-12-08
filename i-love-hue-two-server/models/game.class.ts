@@ -35,30 +35,51 @@ export class Game {
     private static COLORSETS = [
         ['#474A9B', '#1E966C', '#C74FAA', '#F5DFB8'],
         ['#EFFC54', '#78EFC5', '#FD42CD', '#4A45D7'],
-        ['#E84040', '#1D2F31', '#D4E875', '#00DCE4']
+        ['#E84040', '#1D2F31', '#D4E875', '#00DCE4'],
+        ['#57E048', '#FBFA6C', '#523F76', '#A361C2'],
+        ['#6EB7C8', '#F5D75F', '#174BDC', '#F67E5B'],
+        ['#6E1F77', '#E5134A', '#097FF8', '#FCD7BD'],
+        ['#BB68DC', '#15346D', '#E1C38D', '#29B26A'],
+        ['#5C2AE2', '#F85C66', '#3BDCCC', '#F2C93B']
     ];
 
     constructor(mode:             number,
                 name:             string,
                 websocketService: WebsocketService,
                 difficulty:       number) {
-
         this.name = name || 'Game'+ImmutableMask.rng(0, 99);
         this.mode = Game.GAMEMODE[mode];
         this.im = new ImmutableMask(this.mode.rows, this.mode.columns, difficulty);
         this.websocketService = websocketService;
-        this.map  = new Map(
+        this.map  = this.generateMap();
+        this.state = 'ready';
+    }
+
+    public generateMap(): Map {
+        return new Map(
             this.mode.rows,
             this.mode.columns,
             ...Game.COLORSETS[ImmutableMask.rng(0, Game.COLORSETS.length - 1)]
         );
-        this.state = 'ready';
+    }
+
+    public newRound(callback: any): void {
+        this.map = this.generateMap();
+        this.generateAndSetTiles();
+
+        callback();
     }
 
     public initiate(callback: any): void {
         this.state = 'initiated';
         this.startClock();
 
+        this.generateAndSetTiles();
+
+        callback();
+    }
+
+    private generateAndSetTiles() {
         let tiles = this.im.maskTiles(this.map.tiles);
 
         // this is the solution, keep it safe you hear!
@@ -67,8 +88,6 @@ export class Game {
         for (let client of this.clients) {
             client.setTiles(this.im.scrambleTiles(tiles));
         }
-
-        callback();
     }
 
     public startClock(): void {

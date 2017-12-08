@@ -9,6 +9,7 @@ import { AppComponent } from './app.component';
 import { PlayFieldComponent } from './components/play-field/play-field.component';
 import { MusicPlayerComponent } from './components/music-player/music-player.component';
 import { TitleHeaderComponent } from './components/header/title-header.component';
+import { ClockComponent } from './components/clock/clock.component';
 
 @NgModule({
   declarations: [
@@ -16,7 +17,8 @@ import { TitleHeaderComponent } from './components/header/title-header.component
     BoardComponent,
     PlayFieldComponent,
     MusicPlayerComponent,
-    TitleHeaderComponent
+    TitleHeaderComponent,
+    ClockComponent
   ],
   imports: [
     BrowserModule,

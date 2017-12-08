@@ -9,25 +9,37 @@ import { Client } from '../../../i-love-hue-two-server/models/client.class';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  state: string;
-  games: Array<string>;
-  url: string;
   defaultUrl = 'ws://localhost:8999';
-  messageService: MessageService;
-  players: Client[] = [];
-  self: Client;
-  difficulty: number;
-  mode: number;
-  celebrations: string;
-  customUrl = {
+  startTime  = '';
+  countdown  = '';
+  customUrl  = {
     value: undefined
   };
   playerName = {
     value: undefined
   };
+  state:          string;
+  games:          Array<string>;
+  url:            string;
+  messageService: MessageService;
+  players:        Client[] = [];
+  self:           Client;
+  difficulty:     number;
+  mode:           number;
+  celebrations:   string;
 
   constructor(){
     this.state = 'splash';
+  }
+
+  startClock(c) {
+    this.countdown = '';
+    this.startTime = c;
+  }
+
+  setCountdown(c) {
+    this.startTime = '';
+    this.countdown = c;
   }
 
   connectToGame(playerName: string, url?: string) {
@@ -73,6 +85,7 @@ export class AppComponent {
 
   endGame(message: any): void {
     this.celebrations = (message.client_id === this.self.id ? 'win' : 'lose');
+    this.setCountdown('00:15');
     this.players.find((player) => player.id === message.client_id).incrementScore();
   }
 

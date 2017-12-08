@@ -1,7 +1,11 @@
 <div class="music-controls">
   <button class="btn btn-outline-primary"
           [ngClass]="{'paused': !play}"
-          (click)="pauseMusic()">&#10074;&#10074;</button>
+          (click)="pauseMusic()">
+    <span class="fa" [ngClass]="{'fa-pause': play, 'fa-play': !play}"></span>
+  </button>
   <button class="btn btn-outline-primary"
-          (click)="nextSong()">&#x23ed;</button>
+          (click)="nextSong()">
+    <span class="fa fa-fast-forward"></span>
+  </button>
 </div>
