@@ -140,7 +140,7 @@ export class MainController {
                 setTimeout(this.newRound, 15000);
             }
         });
-        for (let client of this.game.getAllClients()) {
+        /*for (let client of this.game.getAllClients()) {
             if (client.id !== message.client_id) {
                 this.websocketService.sendMessageToClient(
                     client.id,
@@ -154,7 +154,7 @@ export class MainController {
                     }
                 );
             }
-        }
+        }*/
     }
 
     private playerForfeit(message: any): void {

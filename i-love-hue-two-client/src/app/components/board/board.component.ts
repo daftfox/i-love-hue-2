@@ -47,8 +47,11 @@ export class BoardComponent implements OnInit, OnChanges {
       if (this.board && !changes.tiles.previousValue) {
         this.addTiles();
       } else if (this.board) {
-        if (!this.ownBoard) {
-          this.swappedTiles = this.getOpponentsSwappedTiles(changes.tiles.previousValue, changes.tiles.newValue);
+        if (!this.ownBoard &&
+            changes.tiles &&
+            changes.tiles.previousValue &&
+            changes.tiles.currentValue) {
+          this.swappedTiles = this.getOpponentsSwappedTiles(changes.tiles.previousValue, changes.tiles.currentValue);
         }
         this.updateTiles();
       }
@@ -57,16 +60,20 @@ export class BoardComponent implements OnInit, OnChanges {
 
   private getOpponentsSwappedTiles(from: Tile[], to: Tile[]): any {
     let swappedTiles = {
-      from: '',
-      to: ''
+      from: null,
+      to: null
     };
-    from.forEach((tile, index) => {
-      if ((from[index].x !== to[index].x) &&
-          (from[index].y !== to[index].y)) {
-        swappedTiles.from = from[index].id;
-        swappedTiles.to = to[index].id;
+    for (let i = 0; i < from.length - 1; i++) {
+      if ((from[i].x !== to[i].x) ||
+          (from[i].y !== to[i].y)) {
+        if (!swappedTiles.from) {
+          swappedTiles.from = from[i].id;
+        } else {
+          swappedTiles.to = to[i].id;
+        }
       }
-    });
+    }
+    console.log(swappedTiles);
     return swappedTiles;
   }
 
@@ -99,6 +106,7 @@ export class BoardComponent implements OnInit, OnChanges {
   }
 
   updateTiles() {
+    console.log(this.swappedTiles);
     let data = this.tiles.filter((tile) => (tile.id === this.swappedTiles.from || tile.id === this.swappedTiles.to));
     let reverseData = [
       {x: data[1].x, y: data[1].y},
