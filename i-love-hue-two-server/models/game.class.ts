@@ -98,7 +98,7 @@ export class Game {
     }
 
     public stopClock(): void {
-        this.clock();
+        clearInterval(this.clock);
     }
 
     public swapTiles(clientId: string, tileSwap: any, playerVictory: any): void {
