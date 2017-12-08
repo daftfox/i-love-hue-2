@@ -21,6 +21,7 @@ export class AppComponent implements OnInit {
   mode: number;
   celebrations: string;
 
+
   constructor(){
     this.state = 'splash';
   }

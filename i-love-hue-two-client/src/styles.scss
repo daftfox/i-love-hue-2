@@ -46,7 +46,8 @@ input {
   border-color: $peach!important;
   color: $peach!important;
 
-  &:hover{
+  &:hover,
+  &.paused {
     background-color: $peach!important;
     color: white!important;
 
@@ -165,6 +166,15 @@ input {
   }
 }
 
+.music-controls {
+  position: fixed;
+  bottom: 10px;
+  right: 10px;
+
+  .btn {
+    padding: 0.2em 0.5em;
+  }
+}
 
 
 

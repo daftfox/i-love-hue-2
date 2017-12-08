@@ -1,0 +1,7 @@
+<div class="music-controls">
+  <button class="btn btn-outline-primary"
+          [ngClass]="{'paused': !play}"
+          (click)="pauseMusic()">&#10074;&#10074;</button>
+  <button class="btn btn-outline-primary"
+          (click)="nextSong()">&#x23ed;</button>
+</div>

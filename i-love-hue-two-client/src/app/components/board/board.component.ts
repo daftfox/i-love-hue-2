@@ -1,6 +1,5 @@
 import {
-  Component, OnInit, OnChanges, ViewChild, ElementRef, Input, Output, EventEmitter,
-  SimpleChange
+  Component, OnInit, OnChanges, ViewChild, ElementRef, Input, Output, EventEmitter
 } from '@angular/core';
 
 import * as d3 from 'd3';
@@ -91,30 +90,42 @@ export class BoardComponent implements OnInit, OnChanges {
       .enter()
       .append('rect')
       .attr('class', 'tile')
-      .attr('x', d => (d.x * this.tileSize.width) - this.tileSize.width)
-      .attr('y', d => (d.y * this.tileSize.height) - this.tileSize.width)
-      .attr('width', this.tileSize.width)
-      .attr('height', this.tileSize.height)
+      .attr('x', d => ((d.x * this.tileSize.width) - this.tileSize.width) + this.tileSize.width / 2)
+      .attr('y', d => ((d.y * this.tileSize.height) - this.tileSize.height) + this.tileSize.height / 2)
+      .attr('width', 0)
+      .attr('height', 0)
+
       .on('mouseover', this.handleMouseOver)
-      // example of Lambda programming
       .on('mouseout', (d) => {
         return this.handleMouseOut(d, this.selectedTile1, event.target);
       })
-      .on('click', (d) => {                       // don't allow the player to manipulate other boards
+      .on('click', (d) => {                                         // don't allow the player to manipulate other boards
         if (!d.immutable && this.ownBoard && !this.gameOver) {      // also don't allow immutable tiles to be swapped
           this.selectedTile1 = this.handleClick(d, this.selectedTile1, event.target);
         }
       })
-      .style('fill', (d) => d.color);
+      .style('fill', (d) => d.color)
+      .transition()
+      .delay((d) => (d.y + d.x) * 120)
+      .duration(500)
+      .attr('x', d => (d.x * this.tileSize.width) - this.tileSize.width)
+      .attr('y', d => (d.y * this.tileSize.height) - this.tileSize.height)
+      .attr('width', this.tileSize.width)
+      .attr('height', this.tileSize.height);
 
-    // append little grey dot for immutable tiles
+    // append little black dot for immutable tiles
     updateImmutables
       .enter()
       .append('circle')
       .attr('cx', (d) => (d.x * this.tileSize.width) - this.tileSize.width / 2)
       .attr('cy', (d) => (d.y * this.tileSize.height) - this.tileSize.width / 2)
       .attr('r', (d) => (d.immutable ? this.tileSize.width / 10 : 0))
-      .style('fill', 'black');
+      .style('fill-opacity', 0)
+      .transition()
+      .delay((d) => (d.y + d.x) * 180)
+      .duration(500)
+      .style('fill', 'black')
+      .style('fill-opacity', 1);
   }
 
   private handleMouseOver(d, i) {

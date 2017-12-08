@@ -7,12 +7,14 @@ import { BoardComponent } from './components/board/board.component';
 
 import { AppComponent } from './app.component';
 import { PlayFieldComponent } from './components/play-field/play-field.component';
+import { MusicPlayerComponent } from './components/music-player/music-player.component';
 
 @NgModule({
   declarations: [
     AppComponent,
     BoardComponent,
-    PlayFieldComponent
+    PlayFieldComponent,
+    MusicPlayerComponent
   ],
   imports: [
     BrowserModule,

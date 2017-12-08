@@ -1,4 +1,5 @@
 <div id="particles-js"></div>
+<music-player></music-player>
 
 <div class="wrapper">
   <div class="row justify-content-end">
@@ -27,21 +28,21 @@
             </div>
           </div>
           <div class="row justify-content-center">
-            <div class="col-6 text-right m-t-1">
+            <div class="col-6 text-right m-t-3">
               <label for="url">Server url: <small>(optional)</small></label>
             </div>
-            <div class="col-6 m-t-1">
+            <div class="col-6 m-t-3">
               <input id="url" type="text" #customUrl />
             </div>
 
-            <div class="col-6 text-right m-t-1">
+            <div class="col-6 text-right m-t-3">
               <label for="player-name">Player name: <small>(required)</small></label>
             </div>
-            <div class="col-6 m-t-1">
+            <div class="col-6 m-t-3">
               <input id="player-name" type="text" #playerName />
             </div>
 
-            <div class="col-12 text-center m-t-1">
+            <div class="col-12 text-center m-t-3">
               <button class="btn btn-lg btn-outline-primary"
                       [ngClass]="{'disabled': !playerName.value}"
                       (click)="connectToGame(playerName.value, customUrl.value)"
@@ -101,12 +102,12 @@
               </button>
             </div>
 
-            <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
+            <<!--div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
               <span>Game: <small>(select one to join)</small></span>
               <select>
                 <option value="game" *ngFor="let game of games">{{game}}</option>
               </select>
-            </div>
+            </div>-->
             <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
               <button class="btn btn-lg btn-outline-primary"
                       (click)="joinGame()">
@@ -137,7 +138,7 @@
             </div>
           </div>
           <div class="row">
-            <div class="col-12 text-center">
+            <div class="col-12 text-center m-t-3">
               <button class="btn btn-lg btn-outline-primary"
                       [ngClass]="{'ready': isReady()}"
                       (click)="toggleSelfReady()">
@@ -145,7 +146,7 @@
               </button>
             </div>
 
-            <div class="col-12 text-center m-t-1">
+            <div class="col-12 text-center m-t-3">
               <button class="btn btn-lg btn-outline-primary"
                       [ngClass]="{'disabled': !canStartGame()}"
                       (click)="canStartGame() && startGame()"
