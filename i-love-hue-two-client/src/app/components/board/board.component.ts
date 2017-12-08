@@ -54,8 +54,8 @@ export class BoardComponent implements OnInit, OnChanges {
 
   createBoard() {
     let element   = this.boardContainer.nativeElement;
-    this.width    = Math.round(element.offsetWidth - this.margin.left - this.margin.right);
-    this.height   = Math.round(element.offsetHeight - this.margin.top - this.margin.bottom);
+    this.width    = Math.floor(element.offsetWidth - this.margin.left - this.margin.right);
+    this.height   = Math.floor(element.offsetHeight - this.margin.top - this.margin.bottom);
 
     this.rows     = d3.max(this.tiles, d => d.y);
     this.columns  = d3.max(this.tiles, d => d.x);
@@ -104,7 +104,7 @@ export class BoardComponent implements OnInit, OnChanges {
       .attr('width', this.tileSize.width)
       .attr('height', this.tileSize.height)
       .on('mouseover', (d) => {
-        return this.handleMouseOver(d);
+        return this.handleMouseOver.bind(this);
       })
       .on('mouseout', (d) => {
         return this.handleMouseOut(d, this.selectedTile1, event.target);
@@ -132,7 +132,7 @@ export class BoardComponent implements OnInit, OnChanges {
       .attr('width', 0)
       .attr('height', 0)
       .on('mouseover', (d) => {
-        return this.handleMouseOver(d);
+        return this.handleMouseOver.bind(this);
       })
       .on('mouseout', (d) => {
         return this.handleMouseOut(d, this.selectedTile1, event.target);

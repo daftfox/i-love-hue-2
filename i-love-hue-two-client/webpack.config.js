@@ -82,8 +82,7 @@ module.exports = {
     ],
     "scripts": [
       "script-loader!./node_modules\\jquery\\dist\\jquery.min.js",
-      "script-loader!./node_modules\\d3\\build\\d3.min.js",
-      "script-loader!./src\\lib\\particles.js"
+      "script-loader!./node_modules\\d3\\build\\d3.min.js"
     ],
     "styles": [
       "./src\\styles.scss",

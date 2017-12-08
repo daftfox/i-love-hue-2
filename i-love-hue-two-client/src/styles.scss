@@ -2,6 +2,7 @@ $peach: #ff6358;
 $gray:  #bdbdbd;
 $green: #73C92B;
 
+
 body.dark-background {
   background-color: #f0ebd8;
 }
@@ -25,9 +26,11 @@ body.dark-background {
   color: $peach;
 }
 
-input {
+input[type="text"] {
   border-radius: 3px;
   border-width: 1px;
+  width: 100%;
+  max-width: 200px;
 
   &:focus {
     outline-color: $peach;
@@ -36,10 +39,8 @@ input {
 
 #particles-js{
   position: fixed;
-  top: 0;
-  bottom: 0;
-  left: 0;
-  right: 0;
+  height: 100vh;
+  width: 100vw;
 }
 
 .btn-outline-primary {
@@ -88,14 +89,14 @@ input {
 
 
 .play-screen {
-  height: 100vh;
+  height: 100%;
 
   .celebration-panel {
     position: absolute;
-    height: 100%;
+    height: 70%;
     width: 100%;
     opacity: 0;
-    transition-duration: 1s;
+    transition-duration: 2s;
     text-align: center;
     padding-top: 30%;
     pointer-events: none;
@@ -119,7 +120,7 @@ input {
   .field {
     width: 75vh;
     height: 85vh;
-    margin: 5vh auto 0;
+    margin: 2vh auto 0;
   }
 
   .info {
@@ -131,7 +132,7 @@ input {
     .player-swaps {
       font-size: 28px;
       display: inline-block;
-      width: 33%;
+      width: 32%
     }
 
     .player-swaps {
@@ -140,8 +141,13 @@ input {
 
     .player-score {
       text-align: right;
-      float: right;
     }
+  }
+}
+
+@media screen and (max-width: 700px) {
+  div {
+    font-size: 18px!important;
   }
 }
 
@@ -169,7 +175,7 @@ input {
 
     .player-score {
       text-align: right;
-      float: right;
+      width: 32%;
     }
   }
 }

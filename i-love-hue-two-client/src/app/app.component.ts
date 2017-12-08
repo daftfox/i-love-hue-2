@@ -1,5 +1,4 @@
-import { Component, OnInit } from '@angular/core';
-import { ParticleJs } from './config/particlejs.config';
+import { Component } from '@angular/core';
 import { MessageService } from './services/message.service';
 import { Client } from '../../../i-love-hue-two-server/models/client.class';
 
@@ -9,7 +8,7 @@ import { Client } from '../../../i-love-hue-two-server/models/client.class';
   templateUrl: './app.component.html',
   styleUrls: ['./app.component.css']
 })
-export class AppComponent implements OnInit {
+export class AppComponent {
   state: string;
   games: Array<string>;
   url: string;
@@ -20,13 +19,19 @@ export class AppComponent implements OnInit {
   difficulty: number;
   mode: number;
   celebrations: string;
+  customUrl = {
+    value: undefined
+  };
+  playerName = {
+    value: undefined
+  };
 
   constructor(){
     this.state = 'splash';
   }
 
   connectToGame(playerName: string, url?: string) {
-    this.url = (url.length > 0 ? url : this.defaultUrl);
+    this.url = (url && url.length > 0 ? url : this.defaultUrl);
 
     this.messageService = new MessageService(this.url);
 
@@ -186,9 +191,5 @@ export class AppComponent implements OnInit {
   gameOver(): boolean {
     if (this.celebrations) return true;
     else return false;
-  }
-
-  ngOnInit () {
-    particlesJS.load('particles-js', ParticleJs.config);
   }
 }

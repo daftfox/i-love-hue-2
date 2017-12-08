@@ -1,6 +1,3 @@
-<div id="particles-js"></div>
-<music-player></music-player>
-
 <div class="wrapper">
   <div class="row justify-content-end">
     <div id="main-field"
@@ -10,36 +7,21 @@
         <div class="splash-screen"
              *ngSwitchCase="'splash'">
           <div class="row justify-content-center">
-            <div class="title col-auto">
-              <h1>I <span class="heart peach">&#9825;</span> HUE <span class="peach">2</span></h1>
-              <h2 class="peach d-flex justify-content-around">
-                <span>M</span>
-                <span>U</span>
-                <span>L</span>
-                <span>T</span>
-                <span>I</span>
-                <span>P</span>
-                <span>L</span>
-                <span>A</span>
-                <span>Y</span>
-                <span>E</span>
-                <span>R</span>
-              </h2>
-            </div>
+            <title-header></title-header>
           </div>
           <div class="row justify-content-center">
             <div class="col-6 text-right m-t-3">
               <label for="url">Server url: <small>(optional)</small></label>
             </div>
             <div class="col-6 m-t-3">
-              <input id="url" type="text" #customUrl />
+              <input id="url" type="text" [(ngModel)]="customUrl.value" />
             </div>
 
             <div class="col-6 text-right m-t-3">
               <label for="player-name">Player name: <small>(required)</small></label>
             </div>
             <div class="col-6 m-t-3">
-              <input id="player-name" type="text" #playerName />
+              <input id="player-name" type="text" [(ngModel)]="playerName.value" />
             </div>
 
             <div class="col-12 text-center m-t-3">
@@ -56,22 +38,7 @@
         <div *ngSwitchCase="'game-select'"
              class="game-select">
           <div class="row justify-content-center">
-            <div class="title col-auto">
-              <h1>I <span class="heart peach">&#9825;</span> HUE <span class="peach">2</span></h1>
-              <h2 class="peach d-flex justify-content-around">
-                <span>M</span>
-                <span>U</span>
-                <span>L</span>
-                <span>T</span>
-                <span>I</span>
-                <span>P</span>
-                <span>L</span>
-                <span>A</span>
-                <span>Y</span>
-                <span>E</span>
-                <span>R</span>
-              </h2>
-            </div>
+            <title-header></title-header>
           </div>
           <div class="row">
             <div class="col-12 text-center m-t-3">
@@ -80,14 +47,14 @@
             </div>
 
             <div class="col-12 text-center m-t-3">
-              <span>Game difficulty: </span>
+              <div>Game difficulty: </div>
               <input class="" type="radio" value="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
               <input class="" type="radio" value="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
               <input class="" type="radio" value="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
             </div>
 
             <div class="col-12 text-center m-t-3">
-              <span>Board size: </span>
+              <div>Board size: </div>
               <input class="" type="radio" value="0" name="mode" [(ngModel)]="mode" /> 8x8
               <input class="" type="radio" value="1" name="mode" [(ngModel)]="mode" /> 10x10
               <input class="" type="radio" value="2" name="mode" [(ngModel)]="mode" /> 15x15
@@ -120,22 +87,7 @@
         <div *ngSwitchCase="'lobby'"
              class="lobby">
           <div class="row justify-content-center">
-            <div class="title col-auto">
-              <h1>I <span class="heart peach">&#9825;</span> HUE <span class="peach">2</span></h1>
-              <h2 class="peach d-flex justify-content-around">
-                <span>M</span>
-                <span>U</span>
-                <span>L</span>
-                <span>T</span>
-                <span>I</span>
-                <span>P</span>
-                <span>L</span>
-                <span>A</span>
-                <span>Y</span>
-                <span>E</span>
-                <span>R</span>
-              </h2>
-            </div>
+            <title-header></title-header>
           </div>
           <div class="row">
             <div class="col-12 text-center m-t-3">
@@ -172,9 +124,8 @@
       </div>
     </div>
 
-
     <div id="lobby"
-         class="col-lg-3 col-12">
+         class="col-lg-3 col-12 hidden-md-down">
       <div class="row"
            *ngIf="state === 'lobby'">
         <div class="row"
@@ -204,3 +155,4 @@
     </div>
   </div>
 </div>
+<music-player></music-player>
