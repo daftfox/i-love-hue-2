@@ -30,7 +30,7 @@ export class BoardComponent implements OnInit, OnChanges {
   private columns:      any;
   private swappedTiles: any;
 
-  private selectedTile1: string;
+  private selectedTile: string;
 
   constructor() {}
 
@@ -93,8 +93,6 @@ export class BoardComponent implements OnInit, OnChanges {
     this.board.selectAll(`rect.${this.swappedTiles.from}`).remove();
     this.board.selectAll(`rect.${this.swappedTiles.to}`).remove();
 
-    //this.drawTiles(tiles);
-
     tiles
       .enter()
       .append('rect')
@@ -104,15 +102,16 @@ export class BoardComponent implements OnInit, OnChanges {
       .attr('width', this.tileSize.width)
       .attr('height', this.tileSize.height)
       .on('mouseover', (d) => {
-        return this.handleMouseOver.bind(this);
+        let handler = this.handleMouseOver.bind(this);
+        return handler(d);
       })
       .on('mouseout', (d) => {
-        return this.handleMouseOut(d, this.selectedTile1, event.target);
+        let handler = this.handleMouseOut.bind(this);
+        return handler(d);
       })
-      .on('click', (d) => {                                         // don't allow the player to manipulate other boards
-        if (!d.immutable && this.ownBoard && !this.gameOver) {      // also don't allow immutable tiles to be swapped
-          this.selectedTile1 = this.handleClick(d, this.selectedTile1, event.target);
-        }
+      .on('click', (d) => {
+        let handler = this.handleClick.bind(this);
+        this.selectedTile = handler(d, event.target);
       })
       .style('fill', (d) => d.color)
       .transition()
@@ -132,15 +131,16 @@ export class BoardComponent implements OnInit, OnChanges {
       .attr('width', 0)
       .attr('height', 0)
       .on('mouseover', (d) => {
-        return this.handleMouseOver.bind(this);
+        let handler = this.handleMouseOver.bind(this);
+        return handler(d, event.target);
       })
       .on('mouseout', (d) => {
-        return this.handleMouseOut(d, this.selectedTile1, event.target);
+        let handler = this.handleMouseOut.bind(this);
+        return handler(d, event.target);
       })
-      .on('click', (d) => {                                         // don't allow the player to manipulate other boards
-        if (!d.immutable && this.ownBoard && !this.gameOver) {      // also don't allow immutable tiles to be swapped
-          this.selectedTile1 = this.handleClick(d, this.selectedTile1, event.target);
-        }
+      .on('click', (d) => {
+        let handler = this.handleClick.bind(this);
+        this.selectedTile = handler(d, event.target);
       })
       .style('fill', (d) => d.color)
       .transition()
@@ -184,36 +184,38 @@ export class BoardComponent implements OnInit, OnChanges {
     this.drawImmutables(updateImmutables);
   }
 
-  private handleMouseOver(d) {
+  private handleMouseOver(d, target) {
     if (!d.immutable && !this.gameOver) {
-      d3.select(this).style('stroke', 'lightgrey');
-      d3.select(this).style('stroke-width', '2');
-      d3.select(this).style('stroke-alignment', 'inner');
+      d3.select(target).style('stroke', 'lightgrey');
+      d3.select(target).style('stroke-width', '2');
+      d3.select(target).style('stroke-alignment', 'inner');
     }
   }
 
-  private handleMouseOut(d, selectedTile, target) {
-    if (d.id != selectedTile && !d.immutable && !this.gameOver) {
+  private handleMouseOut(d, target) {
+    if (d.id != this.selectedTile && !d.immutable && !this.gameOver) {
       d3.select(target).style('stroke', 'none');
     }
   }
 
-  private handleClick(d, selectedTile, target): string {
-    let tile = d3.select(target);
-    if (!selectedTile) {
-      tile.style('stroke', 'darkgrey')
-        .style('stroke-width', '2');
-      return d.id;
-    } else if ((selectedTile && selectedTile === d.id)) {
-      d3.selectAll('.tile')
-        .style('stroke', 'none');
-      return null;
-    } else {
-      d3.selectAll('.tile')
-        .style('stroke', 'none');
-      this.swappedTiles = {from: selectedTile, to: d.id};
-      this.boardUpdated.emit(this.swappedTiles);
-      return null;
+  private handleClick(d, target): string {
+    if (!d.immutable && this.ownBoard && !this.gameOver) {
+      let tile = d3.select(target);
+      if (!this.selectedTile) {
+        tile.style('stroke', 'darkgrey')
+          .style('stroke-width', '2');
+        return d.id;
+      } else if ((this.selectedTile && this.selectedTile === d.id)) {
+        d3.selectAll('.tile')
+          .style('stroke', 'none');
+        return null;
+      } else {
+        d3.selectAll('.tile')
+          .style('stroke', 'none');
+        this.swappedTiles = {from: this.selectedTile, to: d.id};
+        this.boardUpdated.emit(this.swappedTiles);
+        return null;
+      }
     }
   }
 }
