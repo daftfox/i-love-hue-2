@@ -47,9 +47,27 @@ export class BoardComponent implements OnInit, OnChanges {
       if (this.board && !changes.tiles.previousValue) {
         this.addTiles();
       } else if (this.board) {
+        if (!this.ownBoard) {
+          this.swappedTiles = this.getOpponentsSwappedTiles(changes.tiles.previousValue, changes.tiles.newValue);
+        }
         this.updateTiles();
       }
     }
+  }
+
+  private getOpponentsSwappedTiles(from: Tile[], to: Tile[]): any {
+    let swappedTiles = {
+      from: '',
+      to: ''
+    };
+    from.forEach((tile, index) => {
+      if ((from[index].x !== to[index].x) &&
+          (from[index].y !== to[index].y)) {
+        swappedTiles.from = from[index].id;
+        swappedTiles.to = to[index].id;
+      }
+    });
+    return swappedTiles;
   }
 
   createBoard() {
@@ -185,7 +203,7 @@ export class BoardComponent implements OnInit, OnChanges {
   }
 
   private handleMouseOver(d, target) {
-    if (!d.immutable && !this.gameOver) {
+    if (!d.immutable && this.ownBoard && !this.gameOver) {
       d3.select(target).style('stroke', 'lightgrey');
       d3.select(target).style('stroke-width', '2');
       d3.select(target).style('stroke-alignment', 'inner');
@@ -193,7 +211,7 @@ export class BoardComponent implements OnInit, OnChanges {
   }
 
   private handleMouseOut(d, target) {
-    if (d.id != this.selectedTile && !d.immutable && !this.gameOver) {
+    if (d.id != this.selectedTile && !d.immutable && this.ownBoard && !this.gameOver) {
       d3.select(target).style('stroke', 'none');
     }
   }
