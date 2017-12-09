@@ -18,8 +18,9 @@ export class AppComponent {
   playerName = {
     value: undefined
   };
+  gameName:       string;
   state:          string;
-  games:          Array<string>;
+  games:          Array<string> = [];
   url:            string;
   messageService: MessageService;
   players:        Client[] = [];
@@ -27,6 +28,7 @@ export class AppComponent {
   difficulty:     number;
   mode:           number;
   celebrations:   string;
+  selectedGame:   string;
 
   constructor(){
     this.state = 'splash';
@@ -55,12 +57,17 @@ export class AppComponent {
           this.setSelf(message.client_id, playerName);
           this.games = message.games;
           break;
+        case 'new_game_launched':
+          this.games = message.games;
+          break;
         case 'player_joined':
           if (message.client_id === this.self.id) {
             this.switchState('lobby');
+            this.gameName = message.game_name;
           } else {
             let newPlayer = new Client(message.client_id, message.client_name);
             newPlayer.setTiles(message.client_tiles);
+            newPlayer.isReady = message.client_ready;
             this.players.push(newPlayer);
           }
           break;
@@ -70,6 +77,7 @@ export class AppComponent {
           this.switchState('play');
           break;
         case 'player_ready':
+        case 'player_not_ready':
           if (message.client_id !== this.self.id) {
             this.togglePlayerReady(message.client_id);
           }
@@ -123,7 +131,8 @@ export class AppComponent {
     this.sendMessage(
       {
         event: (this.self.isReady ? 'player_ready' : 'player_not_ready'),
-        client_id: this.self.id
+        client_id: this.self.id,
+        game_name: this.gameName
       }
     );
   }
@@ -136,7 +145,8 @@ export class AppComponent {
     this.sendMessage(
       {
         event: 'initiate_game',
-        client_id: this.self.id
+        client_id: this.self.id,
+        game_name: this.gameName
       }
     );
   }
@@ -146,7 +156,8 @@ export class AppComponent {
       {
         event: 'player_join_game',
         client_id: this.self.id,
-        client_name: this.self.name
+        client_name: this.self.name,
+        game_name: this.selectedGame
       }
     );
   }
@@ -189,7 +200,8 @@ export class AppComponent {
           event: "player_tile_swap",
           client_id: this.self.id,
           tile_swap: tileSwap,
-          tile_swaps: player.tileSwaps
+          tile_swaps: player.tileSwaps,
+          game_name: this.gameName
         }
       );
     }

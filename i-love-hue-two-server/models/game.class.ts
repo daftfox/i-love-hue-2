@@ -76,7 +76,7 @@ export class Game {
 
         this.generateAndSetTiles();
 
-        callback();
+        callback(this);
     }
 
     private generateAndSetTiles() {
@@ -104,7 +104,7 @@ export class Game {
     public swapTiles(clientId: string, tileSwap: any, playerVictory: any): void {
         let client = this.getClient(clientId);
         client.swapTiles(tileSwap);
-        playerVictory(this.map.checkSolution(client.tiles));
+        playerVictory(this.map.checkSolution(client.tiles), this);
     }
 
     public getClient(clientId: string): Client {

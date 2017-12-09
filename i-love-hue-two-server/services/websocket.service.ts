@@ -15,7 +15,6 @@ export class WebsocketService {
         this.server = websocketServer;
         this.connection = new Observable((observer: Observer<any>) => {
             this.server.on('connection', (ws: WebSocket) => {
-
                 ws.on('message', (msg: string) => {
                     // parse the message and pass it on to the observer
                     let message = JSON.parse(msg);
@@ -58,9 +57,14 @@ export class WebsocketService {
         return this.clients;
     }
 
-    // todo: group clients per game. we don't want to spam our message stream to everyone who is connected.
     public broadcastMessage(message: any): void {
         this.clients.forEach((client: Client) => {
+            this.sendMessage(client, message);
+        });
+    }
+
+    public broadcastMessageInGame(message: any, game: Game): void {
+        game.getAllClients().forEach((client: Client) => {
             this.sendMessage(client, message);
         });
     }

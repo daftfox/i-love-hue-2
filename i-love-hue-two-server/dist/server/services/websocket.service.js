@@ -40,9 +40,13 @@ class WebsocketService {
     getAllClients() {
         return this.clients;
     }
-    // todo: group clients per game. we don't want to spam our message stream to everyone who is connected.
     broadcastMessage(message) {
         this.clients.forEach((client) => {
+            this.sendMessage(client, message);
+        });
+    }
+    broadcastMessageInGame(message, game) {
+        game.getAllClients().forEach((client) => {
             this.sendMessage(client, message);
         });
     }

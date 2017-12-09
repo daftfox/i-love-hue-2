@@ -5,7 +5,13 @@
 Have you wanted to test your gradient-swapping skills against your friends?
 Now you can! With I love hue 2 with realtime multiplayer capabilities.
 
+The goal of this game is to solve a gradient where the colors have been swapped. Turn the board into an unadulterated 
+rainbow of colors.
+
 This game was built whithin a week and contains more than a few bugs.
+
+### Prerequisites
+NodeJS
 
 ### Clone
 run 

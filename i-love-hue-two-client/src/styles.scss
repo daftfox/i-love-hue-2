@@ -169,13 +169,16 @@ input[type="text"] {
 }
 
 #lobby{
+  padding-top: 2vh;
+
   .row {
     width: 90%;
   }
+
   .field {
     width: 250px;
     height: 250px;
-    margin: 10px auto 0;
+    margin: 0 auto 0;
   }
 
   .info {
@@ -185,7 +188,7 @@ input[type="text"] {
     .player-name,
     .player-score,
     .player-swaps {
-      font-size: 28px;
+      font-size: 14px;
       display: inline;
       width: 33%;
     }

@@ -69,12 +69,14 @@
               </button>
             </div>
 
-            <<!--div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
+            <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
               <span>Game: <small>(select one to join)</small></span>
-              <select>
-                <option value="game" *ngFor="let game of games">{{game}}</option>
+              <select [(ngModel)]="selectedGame">
+                <option value="{{game}}"
+                        name="selectedServer"
+                        *ngFor="let game of games">{{game}}</option>
               </select>
-            </div>-->
+            </div>
             <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
               <button class="btn btn-lg btn-outline-primary"
                       (click)="joinGame()">
@@ -116,7 +118,6 @@
             <span *ngIf="celebrations === 'win'">You win!</span>
             <span *ngIf="celebrations === 'lose'" class="peach">You lose!</span>
             <clock [countdown]="countdown" (countdownDone)="setCountdown('')"></clock>
-            <button (click)="setCountdown('00:10')">countdown</button>
           </div>
           <play-field [ownBoard]="true"
                       [player]="self"

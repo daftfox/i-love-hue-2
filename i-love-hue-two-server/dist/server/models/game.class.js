@@ -32,7 +32,7 @@ class Game {
         this.state = 'initiated';
         this.startClock();
         this.generateAndSetTiles();
-        callback();
+        callback(this);
     }
     generateAndSetTiles() {
         let tiles = this.im.maskTiles(this.map.tiles);
@@ -54,7 +54,7 @@ class Game {
     swapTiles(clientId, tileSwap, playerVictory) {
         let client = this.getClient(clientId);
         client.swapTiles(tileSwap);
-        playerVictory(this.map.checkSolution(client.tiles));
+        playerVictory(this.map.checkSolution(client.tiles), this);
     }
     getClient(clientId) {
         return this.clients.find((client) => client.id === clientId);
