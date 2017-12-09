@@ -37,6 +37,12 @@ npm run start_stack_mac
 Two terminals should pop up setting up and starting both the client and server app. Have a cup of coffee while this
 takes place. Both apps should be up and running whithin ten minutes.
 
+### Starting a game
+If you want to run a game using the default server, no custom server url has to be supplied.
+It will automatically connect to `ws://timothy.fyi:8999`
+
+When supplying your own server url, be sure to use the `ws://` (websocket) prefix.
+
 ## Sketches
 ![Poster](images/poster.png)
 ![Sketch start screen](images/sketch_start-screen.png)
