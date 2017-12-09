@@ -38,6 +38,15 @@ jobs:
               ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
             fi
 
+      - run:
+          name: Running build script for develop branch
+          command: |
+            if [ "${CIRCLE_BRANCH}" == "develop" ]
+            then
+              chmod u+x ./deployments/build_prod.sh
+              npm run build_prod
+            fi
+
       #- add_ssh_keys:
       #      fingerprints:
       #        - 0f:aa:30:da:01:a2:de:9d:1e:5c:96:19:b5:a9:5f:c9
