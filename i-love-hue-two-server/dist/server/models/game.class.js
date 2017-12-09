@@ -49,7 +49,7 @@ class Game {
         }, 1000);
     }
     stopClock() {
-        this.clock();
+        clearInterval(this.clock);
     }
     swapTiles(clientId, tileSwap, playerVictory) {
         let client = this.getClient(clientId);

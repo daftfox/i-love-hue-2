@@ -66,6 +66,7 @@ export class AppComponent {
           break;
         case 'initiate_game':
           this.setTiles(<Client[]>message.players);
+          this.celebrations = null;
           this.switchState('play');
           break;
         case 'player_ready':
@@ -111,7 +112,9 @@ export class AppComponent {
 
   setTiles(players: Client[]): void {
     for (let player of players) {
-      this.players.find((p) => p.id === player.id).setTiles(player.tiles);
+      let p = this.players.find((p) => p.id === player.id);
+      p.setTiles(player.tiles);
+      p.tileSwaps = 0;
     }
   }
 

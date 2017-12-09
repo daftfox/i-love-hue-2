@@ -1,3 +1,10 @@
 .idea/
 i-love-hue-two-client/npm-debug.log.*
 i-love-hue-two-server/node_modules/
+node_modules/
+i-love-hue-two-server/tsserver.cmd
+i-love-hue-two-server/tsserver
+i-love-hue-two-server/tsc.cmd
+i-love-hue-two-server/tsc
+i-love-hue-two-server/mime.cmd
+i-love-hue-two-server/mime

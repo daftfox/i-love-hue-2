@@ -47,13 +47,18 @@ export class BoardComponent implements OnInit, OnChanges {
       if (this.board && !changes.tiles.previousValue) {
         this.addTiles();
       } else if (this.board) {
-        if (!this.ownBoard &&
+        if (!this.ownBoard &&               // update for someone else's board
             changes.tiles &&
             changes.tiles.previousValue &&
             changes.tiles.currentValue) {
           this.swappedTiles = this.getOpponentsSwappedTiles(changes.tiles.previousValue, changes.tiles.currentValue);
+          this.updateTiles();
+        } else if (changes.tiles &&         // new round, new chances!
+                   changes.tiles.previousValue[0].id !== changes.tiles.currentValue[0].id) {
+          this.addTiles();
+        } else {
+          this.updateTiles();
         }
-        this.updateTiles();
       }
     }
   }
@@ -73,7 +78,6 @@ export class BoardComponent implements OnInit, OnChanges {
         }
       }
     }
-    console.log(swappedTiles);
     return swappedTiles;
   }
 
@@ -106,7 +110,6 @@ export class BoardComponent implements OnInit, OnChanges {
   }
 
   updateTiles() {
-    console.log(this.swappedTiles);
     let data = this.tiles.filter((tile) => (tile.id === this.swappedTiles.from || tile.id === this.swappedTiles.to));
     let reverseData = [
       {x: data[1].x, y: data[1].y},
@@ -232,11 +235,11 @@ export class BoardComponent implements OnInit, OnChanges {
           .style('stroke-width', '2');
         return d.id;
       } else if ((this.selectedTile && this.selectedTile === d.id)) {
-        d3.selectAll('.tile')
+        d3.selectAll('rect')
           .style('stroke', 'none');
         return null;
       } else {
-        d3.selectAll('.tile')
+        d3.selectAll('rect')
           .style('stroke', 'none');
         this.swappedTiles = {from: this.selectedTile, to: d.id};
         this.boardUpdated.emit(this.swappedTiles);

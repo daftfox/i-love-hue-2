@@ -98,7 +98,10 @@ export class MainController {
 
     private newRound(): void {
         this.game.newRound(() => {
-            let clients = this.game.getAllClients().map((c) => {return {id: c.id, tiles: c.tiles}});
+            let clients = this.game.getAllClients().map((c) => {
+                c.tileSwaps = 0;
+                return {id: c.id, tiles: c.tiles}
+            });
             this.websocketService.broadcastMessage(
                 {
                     "event": "initiate_game",
@@ -140,21 +143,6 @@ export class MainController {
                 setTimeout(this.newRound.bind(this), 15000);
             }
         });
-        /*for (let client of this.game.getAllClients()) {
-            if (client.id !== message.client_id) {
-                this.websocketService.sendMessageToClient(
-                    client.id,
-                    {
-                        "event": "player_tile_swap",
-                        "client_id": message.client_id,
-                        "tile_swap": {
-                            "from": message.tile_swap.from,
-                            "to": message.tile_swap.to
-                        }
-                    }
-                );
-            }
-        }*/
     }
 
     private playerForfeit(message: any): void {
