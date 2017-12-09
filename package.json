@@ -9,7 +9,7 @@
     "start_server": "cd ./i-love-hue-two-server && npm run start",
     "build_prod": "./deployments/build_prod.sh",
     "postinstall": "npm run install_client && npm run install_server",
-    "install_client": "cd ././i-love-hue-two-client && npm install",
-    "install_server": "cd ././i-love-hue-two-server && npm install"
+    "install_client": "npm --prefix ./i-love-hue-two-client install",
+    "install_server": "npm --prefix ./i-love-hue-two-server install"
   }
 }
