@@ -75,18 +75,18 @@ module.exports = {
   },
   "entry": {
     "main": [
-      "./src/main.ts"
+      "./src\\main.ts"
     ],
     "polyfills": [
-      "./src/polyfills.ts"
+      "./src\\polyfills.ts"
     ],
     "scripts": [
-      "script-loader!./node_modules/jquery/dist/jquery.min.js",
-      "script-loader!./node_modules/d3/build/d3.min.js"
+      "script-loader!./node_modules\\jquery\\dist\\jquery.min.js",
+      "script-loader!./node_modules\\d3\\build\\d3.min.js"
     ],
     "styles": [
-      "./src/styles.scss",
-      "./node_modules/bootstrap/scss/bootstrap.scss"
+      "./src\\styles.scss",
+      "./node_modules\\bootstrap\\scss\\bootstrap.scss"
     ]
   },
   "output": {
@@ -122,8 +122,8 @@ module.exports = {
       },
       {
         "exclude": [
-          path.join(process.cwd(), "src/styles.scss"),
-          path.join(process.cwd(), "node_modules/bootstrap/scss/bootstrap.scss")
+          path.join(process.cwd(), "src\\styles.scss"),
+          path.join(process.cwd(), "node_modules\\bootstrap\\scss\\bootstrap.scss")
         ],
         "test": /\.css$/,
         "use": [
@@ -146,8 +146,8 @@ module.exports = {
       },
       {
         "exclude": [
-          path.join(process.cwd(), "src/styles.scss"),
-          path.join(process.cwd(), "node_modules/bootstrap/scss/bootstrap.scss")
+          path.join(process.cwd(), "src\\styles.scss"),
+          path.join(process.cwd(), "node_modules\\bootstrap\\scss\\bootstrap.scss")
         ],
         "test": /\.scss$|\.sass$/,
         "use": [
@@ -178,8 +178,8 @@ module.exports = {
       },
       {
         "exclude": [
-          path.join(process.cwd(), "src/styles.scss"),
-          path.join(process.cwd(), "node_modules/bootstrap/scss/bootstrap.scss")
+          path.join(process.cwd(), "src\\styles.scss"),
+          path.join(process.cwd(), "node_modules\\bootstrap\\scss\\bootstrap.scss")
         ],
         "test": /\.less$/,
         "use": [
@@ -208,8 +208,8 @@ module.exports = {
       },
       {
         "exclude": [
-          path.join(process.cwd(), "src/styles.scss"),
-          path.join(process.cwd(), "node_modules/bootstrap/scss/bootstrap.scss")
+          path.join(process.cwd(), "src\\styles.scss"),
+          path.join(process.cwd(), "node_modules\\bootstrap\\scss\\bootstrap.scss")
         ],
         "test": /\.styl$/,
         "use": [
@@ -239,8 +239,8 @@ module.exports = {
       },
       {
         "include": [
-          path.join(process.cwd(), "src/styles.scss"),
-          path.join(process.cwd(), "node_modules/bootstrap/scss/bootstrap.scss")
+          path.join(process.cwd(), "src\\styles.scss"),
+          path.join(process.cwd(), "node_modules\\bootstrap\\scss\\bootstrap.scss")
         ],
         "test": /\.css$/,
         "loaders": ExtractTextPlugin.extract({
@@ -266,8 +266,8 @@ module.exports = {
       },
       {
         "include": [
-          path.join(process.cwd(), "src/styles.scss"),
-          path.join(process.cwd(), "node_modules/bootstrap/scss/bootstrap.scss")
+          path.join(process.cwd(), "src\\styles.scss"),
+          path.join(process.cwd(), "node_modules\\bootstrap\\scss\\bootstrap.scss")
         ],
         "test": /\.scss$|\.sass$/,
         "loaders": ExtractTextPlugin.extract({
@@ -301,8 +301,8 @@ module.exports = {
       },
       {
         "include": [
-          path.join(process.cwd(), "src/styles.scss"),
-          path.join(process.cwd(), "node_modules/bootstrap/scss/bootstrap.scss")
+          path.join(process.cwd(), "src\\styles.scss"),
+          path.join(process.cwd(), "node_modules\\bootstrap\\scss\\bootstrap.scss")
         ],
         "test": /\.less$/,
         "loaders": ExtractTextPlugin.extract({
@@ -334,8 +334,8 @@ module.exports = {
       },
       {
         "include": [
-          path.join(process.cwd(), "src/styles.scss"),
-          path.join(process.cwd(), "node_modules/bootstrap/scss/bootstrap.scss")
+          path.join(process.cwd(), "src\\styles.scss"),
+          path.join(process.cwd(), "node_modules\\bootstrap\\scss\\bootstrap.scss")
         ],
         "test": /\.styl$/,
         "loaders": ExtractTextPlugin.extract({
@@ -380,14 +380,14 @@ module.exports = {
         "favicon.ico"
       ],
       "globOptions": {
-        "cwd": "C:/Users/TCL21566/IdeaProjects/i-love-hue-2/i-love-hue-two-client/src",
+        "cwd": "C:\\Users\\TCL21566\\IdeaProjects\\i-love-hue-2\\i-love-hue-two-client\\src",
         "dot": true,
         "ignore": "**/.gitkeep"
       }
     }),
     new ProgressPlugin(),
     new HtmlWebpackPlugin({
-      "template": "./src/index.html",
+      "template": "./src\\index.html",
       "filename": "./index.html",
       "hash": false,
       "inject": true,
@@ -433,10 +433,10 @@ module.exports = {
     new AotPlugin({
       "mainPath": "main.ts",
       "hostReplacementPaths": {
-        "environments/environment.ts": "environments/environment.ts"
+        "environments\\environment.ts": "environments\\environment.ts"
       },
       "exclude": [],
-      "tsConfigPath": "src/tsconfig.app.json",
+      "tsConfigPath": "src\\tsconfig.app.json",
       "skipCodeGeneration": true
     })
   ],
