@@ -1,9 +1,7 @@
 #!/usr/bin/env bash
 
-pwd
-ls
-cd i-love-you-two-client
+cd i-love-hue-two-client
 npm run build
 
-cd ../i-love-you-two-server
+cd ../i-love-hue-two-server
 tsc
