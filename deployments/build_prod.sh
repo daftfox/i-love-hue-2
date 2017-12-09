@@ -6,3 +6,4 @@ cp -r src/assets dist/assets
 
 cd ../i-love-hue-two-server
 npm run build
+cp  package.json dist/package.json
