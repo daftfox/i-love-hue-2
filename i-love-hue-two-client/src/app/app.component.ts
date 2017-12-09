@@ -9,7 +9,7 @@ import { Client } from '../../../i-love-hue-two-server/models/client.class';
   styleUrls: ['./app.component.css']
 })
 export class AppComponent {
-  defaultUrl = 'ws://localhost:8999';
+  defaultUrl = 'ws://timothy.fyi:8999';
   startTime  = '';
   countdown  = '';
   customUrl  = {
