@@ -1,7 +1,7 @@
 #!/usr/bin/env bash
 
 pwd
-ll
+ls
 cd i-love-you-two-client
 npm run build
 
