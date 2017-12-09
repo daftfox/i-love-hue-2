@@ -24,6 +24,7 @@ jobs:
             - node_modules
             - i-love-hue-2-client/node_modules
             - i-love-hue-2-server/node_modules
+            - i-love-hue-2-client/src/assets/sound-tracks
           key: v1-dependencies-{{ checksum "package.json" }}
 
       - run:
@@ -32,7 +33,7 @@ jobs:
             if [ "${CIRCLE_BRANCH}" == "master" ]
             then
               chmod u+x ./deployments/build_prod.sh
-              npm run build-prod
+              npm run build_prod
               sudo apt install rsync
               ssh-keyscan -H $DEPLOY_HOST >> ~/.ssh/known_hosts
             fi
