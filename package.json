@@ -6,6 +6,7 @@
     "start_stack_windows": "start npm run start_client | start npm run start_server",
     "start_stack_mac": "osascript -e 'tell application \"Terminal\" to do script \"npm run start_client\"' | osascript -e 'tell application \"Terminal\" to do script \"npm run start_client\"'",
     "start_client": "cd ./i-love-hue-two-client && npm run serve",
-    "start_server": "cd ./i-love-hue-two-server && npm run start"
+    "start_server": "cd ./i-love-hue-two-server && npm run start",
+    "build_prod": "./deployments/build_prod.sh"
   }
 }
