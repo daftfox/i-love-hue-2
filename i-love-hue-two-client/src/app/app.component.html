@@ -2,157 +2,160 @@
   <div class="row justify-content-end">
     <div id="main-field"
          class="col-12"
-         [ngClass]="{'col-lg-6': state === 'splash', 'col-lg-9': state === 'play'}">
-      <div [ngSwitch]="state">
-        <div class="splash-screen"
-             *ngSwitchCase="'splash'">
-          <div class="row justify-content-center">
-            <title-header></title-header>
+         [ngClass]="{'col-lg-6': splash || select || lobby, 'col-lg-9': play}">
+      <div class="row justify-content-center"
+           *ngIf="!play">
+        <title-header></title-header>
+      </div>
+      <div [@swipeInOut]
+           class="splash-screen"
+           *ngIf="splash">
+        <div class="row justify-content-center">
+          <div class="col-6 text-right m-t-3">
+            <label for="url">Server url: <small>(optional)</small></label>
           </div>
-          <div class="row justify-content-center">
-            <div class="col-6 text-right m-t-3">
-              <label for="url">Server url: <small>(optional)</small></label>
-            </div>
-            <div class="col-6 m-t-3">
-              <input id="url" type="text" [(ngModel)]="customUrl.value" />
-            </div>
-
-            <div class="col-6 text-right m-t-3">
-              <label for="player-name">Player name: <small>(required)</small></label>
-            </div>
-            <div class="col-6 m-t-3">
-              <input id="player-name" type="text" [(ngModel)]="playerName.value" />
-            </div>
-
-            <div class="col-12 text-center m-t-3">
-              <button class="btn btn-lg btn-outline-primary"
-                      [ngClass]="{'disabled': !playerName.value}"
-                      (click)="connectToGame(playerName.value, customUrl.value)"
-                      [disabled]="!playerName.value">
-                <span>Connect</span>
-              </button>
-            </div>
+          <div class="col-6 m-t-3">
+            <input id="url" type="text" [(ngModel)]="customUrl.value" />
           </div>
-        </div>
 
-        <div *ngSwitchCase="'game-select'"
-             class="game-select">
-          <div class="row justify-content-center">
-            <title-header></title-header>
+          <div class="col-6 text-right m-t-3">
+            <label for="player-name">Player name: <small>(required)</small></label>
           </div>
-          <div class="row">
-            <div class="col-12 text-center m-t-3">
-              <label for="game-name">Game name: <small>(optional)</small></label>
-              <input id="game-name" class="" type="text" #gameName />
-            </div>
+          <div class="col-6 m-t-3">
+            <input id="player-name" type="text" [(ngModel)]="playerName.value" />
+          </div>
 
-            <div class="col-12 text-center m-t-3">
-              <div>Game difficulty: </div>
-              <input class="" type="radio" value="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
-              <input class="" type="radio" value="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
-              <input class="" type="radio" value="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
-            </div>
-
-            <div class="col-12 text-center m-t-3">
-              <div>Board size: </div>
-              <input class="" type="radio" value="0" name="mode" [(ngModel)]="mode" /> 8x8
-              <input class="" type="radio" value="1" name="mode" [(ngModel)]="mode" /> 10x10
-              <input class="" type="radio" value="2" name="mode" [(ngModel)]="mode" /> 15x15
-            </div>
-
-            <div class="col-12 text-center m-t-3">
-              <button class="btn btn-lg btn-outline-primary"
-                      [ngClass]="{'disabled': !difficulty || !mode}"
-                      (click)="newGame(gameName.value, difficulty, mode)"
-                      [disabled]="!difficulty">
-                <span>New game</span>
-              </button>
-            </div>
-
-            <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
-              <span>Game: <small>(select one to join)</small></span>
-              <select [(ngModel)]="selectedGame">
-                <option value="{{game}}"
-                        name="selectedServer"
-                        *ngFor="let game of games">{{game}}</option>
-              </select>
-            </div>
-            <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
-              <button class="btn btn-lg btn-outline-primary"
-                      (click)="joinGame()">
-                <span>Join game</span>
-              </button>
-            </div>
+          <div class="col-12 text-center m-t-3">
+            <button class="btn btn-lg btn-outline-primary"
+                    [ngClass]="{'disabled': !playerName.value}"
+                    (click)="connectToGame(playerName.value, customUrl.value)"
+                    [disabled]="!playerName.value">
+              <span>Connect</span>
+            </button>
           </div>
         </div>
-
-        <div *ngSwitchCase="'lobby'"
-             class="lobby">
-          <div class="row justify-content-center">
-            <title-header></title-header>
-          </div>
-          <div class="row">
-            <div class="col-12 text-center m-t-3">
-              <button class="btn btn-lg btn-outline-primary"
-                      [ngClass]="{'ready': isReady()}"
-                      (click)="toggleSelfReady()">
-                <span>Ready</span>
-              </button>
-            </div>
-
-            <div class="col-12 text-center m-t-3">
-              <button class="btn btn-lg btn-outline-primary"
-                      [ngClass]="{'disabled': !canStartGame()}"
-                      (click)="canStartGame() && startGame()"
-                      [disabled]="!canStartGame()">
-                <span>Start game</span>
-              </button>
-            </div>
+        <div class="row justify-content-center">
+          <div class="col m-t-3 text-center">
+            <h3>Hey there! This game is best played in full-screen mode!</h3>
+            <p class="go-full-screen">
+              (press the F11 key on the keyboard to go to full-screen mode.)
+            </p>
           </div>
         </div>
+      </div>
 
-        <div *ngSwitchCase="'play'"
-             class="play-screen">
-          <div [ngClass]="{'celebrations': celebrations}"
-               class="celebration-panel">
-            <span *ngIf="celebrations === 'win'">You win!</span>
-            <span *ngIf="celebrations === 'lose'" class="peach">You lose!</span>
-            <clock [countdown]="countdown" (countdownDone)="setCountdown('')"></clock>
+      <div [@swipeInOut]
+           *ngIf="select"
+           class="game-select">
+        <div class="row">
+          <div class="col-12 text-center m-t-3">
+            <label for="game-name">Game name: <small>(optional)</small></label>
+            <input id="game-name" class="" type="text" #gameName />
           </div>
-          <play-field [ownBoard]="true"
-                      [player]="self"
-                      [gameOver]="gameOver()"
-                      (boardUpdated)="tileSwap(self, $event)"></play-field>
+
+          <div class="col-12 text-center m-t-3">
+            <div>Game difficulty: </div>
+            <input class="" type="radio" value="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
+            <input class="" type="radio" value="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
+            <input class="" type="radio" value="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
+          </div>
+
+          <div class="col-12 text-center m-t-3">
+            <div>Board size: </div>
+            <input class="" type="radio" value="0" name="mode" [(ngModel)]="mode" /> 8x8
+            <input class="" type="radio" value="1" name="mode" [(ngModel)]="mode" /> 10x10
+            <input class="" type="radio" value="2" name="mode" [(ngModel)]="mode" /> 15x15
+          </div>
+
+          <div class="col-12 text-center m-t-3">
+            <button class="btn btn-lg btn-outline-primary"
+                    [ngClass]="{'disabled': !difficulty || !mode}"
+                    (click)="newGame(gameName.value, difficulty, mode)"
+                    [disabled]="!difficulty">
+              <span>New game</span>
+            </button>
+          </div>
+
+          <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
+            <span>Game: <small>(select one to join)</small></span>
+            <select [(ngModel)]="selectedGame">
+              <option value="{{game}}"
+                      name="selectedServer"
+                      *ngFor="let game of games">{{game}}</option>
+            </select>
+          </div>
+          <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
+            <button class="btn btn-lg btn-outline-primary"
+                    (click)="joinGame()">
+              <span>Join game</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div [@swipeInOut]
+           *ngIf="lobby"
+           class="lobby">
+        <div class="row">
+          <div class="col-12 text-center m-t-3">
+            <button class="btn btn-lg btn-outline-primary"
+                    [ngClass]="{'ready': isReady()}"
+                    (click)="toggleSelfReady()">
+              <span>Ready</span>
+            </button>
+          </div>
+
+          <div class="col-12 text-center m-t-3">
+            <button class="btn btn-lg btn-outline-primary"
+                    [ngClass]="{'disabled': !canStartGame()}"
+                    (click)="canStartGame() && startGame()"
+                    [disabled]="!canStartGame()">
+              <span>Start game</span>
+            </button>
+          </div>
+        </div>
+      </div>
+
+      <div [@swipeInOut]
+           *ngIf="play">
+        <div class="row play-screen no-gutters justify-content-center">
+          <div class="col-12 col-md-10 col-lg-8">
+            <div [ngClass]="{'celebrations': celebrations}"
+                 class="celebration-panel">
+              <span *ngIf="celebrations === 'win'">You win!</span>
+              <span *ngIf="celebrations === 'lose'" class="peach">You lose!</span>
+              <clock [countdown]="countdown" (countdownDone)="setCountdown('')"></clock>
+            </div>
+            <play-field [ownBoard]="true"
+                        [player]="self"
+                        [gameOver]="gameOver()"
+                        (boardUpdated)="tileSwap(self, $event)"></play-field>
+          </div>
         </div>
       </div>
     </div>
 
     <div id="lobby"
-         class="col-lg-3 col-12 hidden-md-down">
-      <div class="row"
-           *ngIf="state === 'lobby'">
-        <div class="row"
+         class="col-3 hidden-lg-down">
+      <div class="row game-lobby no-gutters align-items-center"
+           *ngIf="lobby">
+        <div class="col-12"
              *ngFor="let player of players">
-          <div class="info"
+          <div class="col-12 opponent-info"
                *ngIf="player.id !== self.id">
-            <div class="player-name">
-              <span [ngClass]="{'green': player.isReady, 'peach': !player.isReady}">Player: {{player.name}}</span>
-            </div>
-            <div class="player-score">
-              <span>Score: {{player.score}}</span>
+            <div class="col-8 opponent">
+              <span [ngClass]="{'green': player.isReady, 'peach': !player.isReady}">{{player.name}}</span>
+              <span> - {{player.score}}</span>
             </div>
           </div>
         </div>
       </div>
-      <div *ngIf="state === 'play'">
-        <div class="row"
-             *ngFor="let player of players">
-          <div *ngIf="player.id !== self.id"
-               class="mini-field">
-            <play-field [ownBoard]="false"
-                        [gameOver]="gameOver()"
-                        [player]="player"></play-field>
-          </div>
+      <div *ngIf="play">
+        <div *ngFor="let player of players" class="col-lg-10 col-xl-8 mini-view">
+          <play-field [ownBoard]="false"
+                      [gameOver]="gameOver()"
+                      [player]="player"
+                      *ngIf="player.id !== self.id"></play-field>
         </div>
       </div>
     </div>

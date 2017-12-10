@@ -1,16 +1,23 @@
-$peach: #ff6358;
-$gray:  #bdbdbd;
-$green: #73C92B;
-
+$peach:           #ff6358;
+$gray:            #bdbdbd;
+$green:           #73C92B;
+$background:      #f0ebd8;
+$background-dark: desaturate( darken( $background, 25% ), 20% );
 
 body.dark-background {
-  background-color: #f0ebd8;
+  height:     100vh;
+  width:      100vw;
+  font-size:  18px;
+  background: $background-dark; /* For browsers that do not support gradients */
+  background: -webkit-linear-gradient( left top,        $background, $background-dark ); /* For Safari 5.1 to 6.0 */
+  background:      -o-linear-gradient( bottom right,    $background, $background-dark ); /* For Opera 11.1 to 12.0 */
+  background:    -moz-linear-gradient( bottom right,    $background, $background-dark ); /* For Firefox 3.6 to 15 */
+  background:         linear-gradient( to bottom right, $background, $background-dark ); /* Standard syntax */
 }
 
 .row {
   margin: 0!important;
 }
-
 .m-t-1 {
   margin-top: 10px;
 }
@@ -37,82 +44,75 @@ input[type="text"] {
   }
 }
 
-#particles-js{
-  position: fixed;
-  height: 100vh;
-  width: 100vw;
+h3 {
+  color: $gray;
+  font-size: 1em!important;
+}
+
+.go-full-screen p {
+  font-size: .8em;
+
 }
 
 .btn-outline-primary {
   border-color: $peach!important;
-  color: $peach!important;
+  color:        $peach!important;
 
+  &:focus {
+    outline-color: $peach;
+  }
   &:hover,
   &.paused {
     background-color: $peach!important;
-    color: white!important;
+    color:            white!important;
 
     &.disabled {
-      color: white!important;
+      color:            white!important;
       background-color: darkgrey!important;
     }
   }
 
   &.disabled {
-    color: darkgrey!important;
+    color:        darkgrey!important;
     border-color: darkgrey!important;
   }
 
   &.ready {
     border-color: $green!important;
-    color: $green!important;
+    color:        $green!important;
 
     &:hover{
       background-color: $green!important;
-      color: white!important;
+      color:            white!important;
     }
   }
 }
-
-.title{
-  h1 {
-    margin-top: 25vh;
-    color: #444444;
-    font-size: 6em!important;
-  }
-
-  .heart {
-    font-weight: bolder;
-    font-size: 1.1em;
-  }
-}
-
 
 .play-screen {
   height: 100%;
 
   .celebration-panel {
-    position: absolute;
-    height: 70%;
-    width: 100%;
-    opacity: 0;
+    position:            absolute;
+    height:              70%;
+    width:               100%;
+    opacity:             0;
     transition-duration: 2s;
-    text-align: center;
-    padding-top: 30%;
-    pointer-events: none;
+    text-align:          center;
+    padding-top:         30%;
+    pointer-events:      none;
 
     .clock {
       span {
-        font-size: 90px;
+        font-size:   90px;
         margin-left: -25px;
 
         &.hurry {
-          color: $peach;
+          color:       $peach;
           text-shadow: 0 0 20px $peach;
         }
         &.pulse {
-          -webkit-animation-name: pulsate;
-          -webkit-animation-duration: 1s;
+          -webkit-animation-name:            pulsate;
+          -webkit-animation-duration:        1s;
           -webkit-animation-timing-function: ease-in-out;
           -webkit-animation-iteration-count: infinite;
         }
@@ -120,8 +120,8 @@ input[type="text"] {
     }
 
     span {
-      font-size: 72px;
-      color: white;
+      font-size:   72px;
+      color:       white;
       text-shadow: 0 0 20px white;
 
       &.peach{
@@ -134,79 +134,81 @@ input[type="text"] {
     }
   }
 
-  .field {
-    width: 75vh;
-    height: 85vh;
-    margin: 2vh auto 0;
-  }
+  play-field {
+    padding-top: 10px;
+    display:     block;
+    height:      100vh;
+    width:       100%;
 
-  .info {
-    width: 75vh;
-    margin: 10px auto 0!important;
-
-    .player-name,
-    .player-score,
-    .player-swaps {
-      font-size: 28px;
-      display: inline-block;
-      width: 32%
-    }
-
-    .player-swaps {
-      text-align: center;
-    }
-
-    .player-score {
-      text-align: right;
-    }
+    font-size:   1em;
   }
 }
 
 @media screen and (max-width: 700px) {
-  div {
-    font-size: 18px!important;
-  }
 }
 
 #lobby{
-  padding-top: 2vh;
+  height:     100vh;
+  font-size:  .5em;
 
-  .row {
-    width: 90%;
-  }
+  .mini-view {
+    height:     33vh;
+    padding:    10px;
 
-  .field {
-    width: 250px;
-    height: 250px;
-    margin: 0 auto 0;
-  }
-
-  .info {
-    width: 100%;
-    margin: 10px auto 0!important;
-
-    .player-name,
-    .player-score,
-    .player-swaps {
-      font-size: 14px;
-      display: inline;
-      width: 33%;
+    play-field {
+      height:     100%;
+      display:    block;
     }
+  }
 
-    .player-score {
-      text-align: right;
-      width: 32%;
+  .game-lobby {
+    height: 100%;
+
+    .opponent-info {
+      font-size: 3em;
+
+      div {
+        display: inline-block;
+      }
     }
   }
 }
 
-.music-controls {
-  position: fixed;
-  bottom: 10px;
-  right: 10px;
+music-player {
+  position:  fixed;
+  bottom:    10px;
+  right:     10px;
+  font-size: .8em;
+}
 
-  .btn {
-    padding: 0.2em 0.5em;
+// Extra small devices (portrait phones, less than 576px)
+// No media query since this is the default in Bootstrap
+
+// Small devices (landscape phones, 576px and up)
+@media screen and (max-width: 576px) {
+  #main-field {
+    font-size: .8em;
+  }
+}
+
+// Medium devices (tablets, 768px and up)
+@media screen and (min-width: 576px) and (max-width: 768px) {
+  #main-field {
+    font-size: 1em;
+  }
+}
+
+// Large devices (desktops, 992px and up)
+@media screen and (min-width: 768px) and (max-width: 992px) {
+  #main-field {
+    font-size: 1.4em;
+  }
+}
+
+// Extra large devices (large desktops, 1200px and up)
+@media screen and (min-width: 992px) and (max-width: 1200px) {
+  #main-field {
+    font-size: 1.1em;
   }
 }
 

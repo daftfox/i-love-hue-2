@@ -1,13 +1,26 @@
 import { Component } from '@angular/core';
 import { MessageService } from './services/message.service';
 import { Client } from '../../../i-love-hue-two-server/models/client.class';
+import { trigger, style, transition, animate } from '@angular/animations';
 
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css']
+  styleUrls: ['./app.component.css'],
+  animations: [
+    trigger('swipeInOut', [
+      transition(':enter', [
+        style({transform: 'translateX(100%)', opacity: 0}),
+        animate('400ms ease-in', style({transform: 'translateX(0)', opacity: 1}))
+      ]),
+      transition(':leave', [
+        animate('400ms ease-in', style({transform: 'translateX(-100%)', opacity: 0}))
+      ])
+    ])
+  ]
 })
+
 export class AppComponent {
   defaultUrl = 'ws://timothy.fyi:8999';
   startTime  = '';
@@ -19,7 +32,11 @@ export class AppComponent {
     value: undefined
   };
   gameName:       string;
-  state:          string;
+  //state:          string;
+  splash:         boolean = false;
+  select:         boolean = false;
+  lobby:          boolean = false;
+  play:           boolean = false;
   games:          Array<string> = [];
   url:            string;
   messageService: MessageService;
@@ -31,7 +48,30 @@ export class AppComponent {
   selectedGame:   string;
 
   constructor(){
-    this.state = 'splash';
+    //this.state = 'splash';
+    this.setState('splash');
+  }
+
+  setState(state): void {
+    this.splash = false;
+    this.select = false;
+    this.lobby  = false;
+    this.play   = false;
+
+    switch(state) {
+      case 'splash':
+        this.splash = true;
+        break;
+      case 'select':
+        this.select = true;
+        break;
+      case 'lobby':
+        this.lobby = true;
+        break;
+      case 'play':
+        this.play = true;
+        break;
+    }
   }
 
   startClock(c) {
@@ -53,7 +93,7 @@ export class AppComponent {
       console.log(`Event received: `, message);
       switch (message.event) {
         case 'connect_succesful':
-          this.switchState('game-select');
+          this.setState('select');
           this.setSelf(message.client_id, playerName);
           this.games = message.games;
           break;
@@ -62,7 +102,7 @@ export class AppComponent {
           break;
         case 'player_joined':
           if (message.client_id === this.self.id) {
-            this.switchState('lobby');
+            this.setState('lobby');
             this.gameName = message.game_name;
           } else {
             let newPlayer = new Client(message.client_id, message.client_name);
@@ -74,7 +114,7 @@ export class AppComponent {
         case 'initiate_game':
           this.setTiles(<Client[]>message.players);
           this.celebrations = null;
-          this.switchState('play');
+          this.setState('play');
           break;
         case 'player_ready':
         case 'player_not_ready':
@@ -164,10 +204,6 @@ export class AppComponent {
 
   private sendMessage(message: any): void {
     this.messageService.messages.next(message);
-  }
-
-  switchState(newState: string): void {
-    this.state = newState;
   }
 
   tileSwap(player: Client, tileSwap: any): void {

@@ -1,18 +1,16 @@
-<div class="row">
-  <div class="field" *ngIf="player">
-    <board [gameOver]="gameOver" [ownBoard]="ownBoard" [tiles]="player.tiles" (boardUpdated)="tileSwap($event)"></board>
+<div class="wrapper">
+  <div class="row">
+    <div class="field" *ngIf="player">
+      <board [gameOver]="gameOver" [ownBoard]="ownBoard" [tiles]="player.tiles" (boardUpdated)="tileSwap($event)"></board>
+    </div>
   </div>
-</div>
-<div class="row">
-  <div class="info">
-    <div class="player-name">
+  <div class="row info no-gutters">
+    <div class="player-score col-4">
+      <div>Score: {{player.score}}</div>
+      <div>Swaps: {{player.tileSwaps}}</div>
+    </div>
+    <div class="player-name col-8">
       <span>Player: {{player.name}}</span>
-    </div>
-    <div class="player-swaps">
-      <span>Swaps: {{player.tileSwaps}}</span>
-    </div>
-    <div class="player-score">
-      <span>Score: {{player.score}}</span>
     </div>
   </div>
 </div>

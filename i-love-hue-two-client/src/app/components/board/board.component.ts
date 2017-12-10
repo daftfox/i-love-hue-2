@@ -90,8 +90,8 @@ export class BoardComponent implements OnInit, OnChanges {
     this.columns  = d3.max(this.tiles, d => d.x);
 
     this.tileSize = {
-      width: Math.round(this.width / this.columns),
-      height: Math.round(this.height / this.rows)
+      width: Math.floor(this.width / this.columns),
+      height: Math.floor(this.height / this.rows)
     };
 
     let svg = d3.select(element).append('svg')
