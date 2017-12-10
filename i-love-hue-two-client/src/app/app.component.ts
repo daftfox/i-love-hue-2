@@ -3,7 +3,6 @@ import { MessageService } from './services/message.service';
 import { Client } from '../../../i-love-hue-two-server/models/client.class';
 import { trigger, style, transition, animate } from '@angular/animations';
 
-
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
@@ -31,24 +30,26 @@ export class AppComponent {
   playerName = {
     value: undefined
   };
-  gameName:       string;
-  //state:          string;
-  splash:         boolean = false;
-  select:         boolean = false;
-  lobby:          boolean = false;
-  play:           boolean = false;
-  games:          Array<string> = [];
-  url:            string;
-  messageService: MessageService;
-  players:        Client[] = [];
-  self:           Client;
-  difficulty:     number;
-  mode:           number;
-  celebrations:   string;
-  selectedGame:   string;
+  globalMessages:  Array<any>    = [];
+  games:           Array<any>    = [];
+  players:         Client[]      = [];
+  globalPlayers:   Client[]      = [];
+  splash:          boolean       = false;
+  connectionError: boolean       = false;
+  select:          boolean       = false;
+  lobby:           boolean       = false;
+  play:            boolean       = false;
+  messageService:  MessageService;
+  self:            Client;
+  gameName:        string;
+  gameId:          string;
+  url:             string;
+  difficulty:      number;
+  mode:            number;
+  celebrations:    string;
+  selectedGame:    string;
 
   constructor(){
-    //this.state = 'splash';
     this.setState('splash');
   }
 
@@ -85,12 +86,14 @@ export class AppComponent {
   }
 
   connectToGame(playerName: string, url?: string) {
+    this.connectionError = false;
     this.url = (url && url.length > 0 ? url : this.defaultUrl);
 
     this.messageService = new MessageService(this.url);
 
     this.messageService.messages.subscribe((message) => {
       console.log(`Event received: `, message);
+
       switch (message.event) {
         case 'connect_succesful':
           this.setState('select');
@@ -103,6 +106,7 @@ export class AppComponent {
         case 'player_joined':
           if (message.client_id === this.self.id) {
             this.setState('lobby');
+            this.gameId = message.game_id;
             this.gameName = message.game_name;
           } else {
             let newPlayer = new Client(message.client_id, message.client_name);
@@ -128,7 +132,21 @@ export class AppComponent {
         case 'player_win':
           this.endGame(message);
           break;
+        case 'data_update':
+          this.games         = message.games;
+          this.globalPlayers = message.global_players;
+          break;
+        case 'global_chat_message':
+          this.globalMessages.unshift({
+            sender:         message.client_name,
+            client_id:      message.client_id,
+            chat_message:   message.chat_message
+          });
+          break;
       }
+    }, (err) => {
+      this.connectionError = true;
+      console.log(err);
     });
   }
 
@@ -154,8 +172,21 @@ export class AppComponent {
   }
 
   setSelf(clientId: string, clientName: string): void {
-    this.self = new Client(clientId, clientName);
+    this.self    = new Client(clientName);
+    this.self.id = clientId;
+
     this.players.push(this.self);
+    this.playerUpdate();
+  }
+
+  playerUpdate(): void {
+    this.sendMessage(
+      {
+        event: "player_update",
+        client_id: this.self.id,
+        client_name: this.self.name
+      }
+    );
   }
 
   setTiles(players: Client[]): void {
@@ -170,9 +201,9 @@ export class AppComponent {
     this.players.find((player) => player.id === this.self.id).toggleReady();
     this.sendMessage(
       {
-        event: (this.self.isReady ? 'player_ready' : 'player_not_ready'),
+        event:     (this.self.isReady ? 'player_ready' : 'player_not_ready'),
         client_id: this.self.id,
-        game_name: this.gameName
+        game_id: this.gameId
       }
     );
   }
@@ -184,9 +215,9 @@ export class AppComponent {
   startGame(): void {
     this.sendMessage(
       {
-        event: 'initiate_game',
+        event:     'initiate_game',
         client_id: this.self.id,
-        game_name: this.gameName
+        game_id:   this.gameId
       }
     );
   }
@@ -194,12 +225,21 @@ export class AppComponent {
   joinGame() : void {
     this.sendMessage(
       {
-        event: 'player_join_game',
-        client_id: this.self.id,
+        event:       'player_join_game',
+        client_id:   this.self.id,
         client_name: this.self.name,
-        game_name: this.selectedGame
+        game_id:     this.selectedGame
       }
     );
+  }
+
+  sendChatMessage(chatMessage): void {
+    this.sendMessage({
+      event:       'global_chat_message',
+      client_id:   this.self.id,
+      client_name: this.self.name,
+      text:        chatMessage          // todo: check for evil code in chat message or limit allowed characters
+    });
   }
 
   private sendMessage(message: any): void {
@@ -237,7 +277,7 @@ export class AppComponent {
           client_id: this.self.id,
           tile_swap: tileSwap,
           tile_swaps: player.tileSwaps,
-          game_name: this.gameName
+          game_name: this.gameId
         }
       );
     }

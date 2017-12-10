@@ -1,5 +1,6 @@
 import * as WebSocket from 'ws';
 import { Tile } from './tile.class';
+import { Helper } from './helper.class';
 
 export class Client {
     id:         string;
@@ -10,8 +11,8 @@ export class Client {
     score:      number;
     webSocket?: WebSocket;
 
-    constructor(id: string, name?: string, webSocket?: WebSocket) {
-        this.id = id;
+    constructor(name?: string, webSocket?: WebSocket) {
+        this.id = Helper.generateId();
         this.name = name;
         this.score = 0;
         this.tileSwaps = 0;
@@ -57,16 +58,5 @@ export class Client {
         // reassign tiles. changes object reference, thus triggering the board's onChange() method
         this.tiles = tilesCopy;
         this.tileSwaps++;
-    }
-
-    public static generateId(): string {
-        let text  = "";
-        let range = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-
-        for (let i = 0; i < 5; i++) {
-            text += range.charAt(Math.floor(Math.random() * range.length));
-        }
-
-        return text;
     }
 }

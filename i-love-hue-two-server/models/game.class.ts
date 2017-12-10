@@ -1,9 +1,9 @@
-import { Map } from './map.class';
-import { setInterval } from 'timers';
+import { Map }              from './map.class';
+import { setInterval }      from 'timers';
 import { WebsocketService } from '../services/websocket.service';
-import { Client } from './client.class';
-import { Tile } from './tile.class';
-import { ImmutableMask } from "./immutable-mask.class";
+import { Client }           from './client.class';
+import { ImmutableMask }    from './immutable-mask.class';
+import { Helper }           from './helper.class';
 
 export class GameMode {
     rows:    number;
@@ -16,6 +16,7 @@ export class GameMode {
 }
 
 export class Game {
+    id:               string;
     name:             string;
     map:              Map;
     mode:             GameMode;
@@ -23,6 +24,7 @@ export class Game {
     state:            string;
     time:             number;
     clock:            any;
+    timeout:          any;
     websocketService: WebsocketService;
     im:               ImmutableMask;
 
@@ -47,19 +49,20 @@ export class Game {
                 name:             string,
                 websocketService: WebsocketService,
                 difficulty:       number) {
-        this.name = name || 'Game'+ImmutableMask.rng(0, 99);
-        this.mode = Game.GAMEMODE[mode];
-        this.im = new ImmutableMask(this.mode.rows, this.mode.columns, difficulty);
+        this.name             = name || 'Game'+Helper.rng(0, 99);
+        this.mode             = Game.GAMEMODE[mode];
+        this.im               = new ImmutableMask(this.mode.rows, this.mode.columns, difficulty);
         this.websocketService = websocketService;
-        this.map  = this.generateMap();
-        this.state = 'ready';
+        this.map              = this.generateMap();
+        this.state            = 'ready';
+        this.id               = Helper.generateId();
     }
 
     public generateMap(): Map {
         return new Map(
             this.mode.rows,
             this.mode.columns,
-            ...Game.COLORSETS[ImmutableMask.rng(0, Game.COLORSETS.length - 1)]
+            ...Game.COLORSETS[Helper.rng(0, Game.COLORSETS.length - 1)]
         );
     }
 

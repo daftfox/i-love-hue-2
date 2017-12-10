@@ -30,14 +30,14 @@ class MainController {
             }
         });
     }
-    getGame(name) {
-        let game = this.games.find((game) => game.name === name);
+    getGame(id) {
+        let game = this.games.find((game) => game.id === id);
         if (game) {
             return game;
         }
     }
     playerReady(message) {
-        let game = this.getGame(message.game_name);
+        let game = this.getGame(message.game_id);
         if (game) {
             let clients = game.getAllClients();
             let client = game.getClient(message.client_id);
@@ -51,7 +51,7 @@ class MainController {
         }
     }
     playerJoinGame(message) {
-        let game = this.getGame(message.game_name);
+        let game = this.getGame(message.game_id);
         if (game) {
             game.addClient(message.client_id, message.client_name);
             let clients = game.getAllClients();
@@ -79,7 +79,7 @@ class MainController {
         }
     }
     initiateGame(message) {
-        let game = this.getGame(message.game_name);
+        let game = this.getGame(message.game_id);
         if (game) {
             let initiate = ((game) => {
                 let clients = game.getAllClients().map((c) => {
@@ -93,8 +93,8 @@ class MainController {
             game.initiate(initiate);
         }
     }
-    newRound(gameName) {
-        let game = this.getGame(gameName);
+    newRound(gameId) {
+        let game = this.getGame(gameId);
         if (game) {
             let newRound = ((game) => {
                 let clients = game.getAllClients().map((c) => {
@@ -110,7 +110,10 @@ class MainController {
         }
     }
     playerTileSwap(message) {
-        let game = this.getGame(message.game_name);
+        let game = this.getGame(message.game_id);
+        // update timeout so game does not get removed for another ten minutes
+        clearTimeout(game.timeout);
+        this.updateTimeout(game.id);
         if (game) {
             let victory = ((playerVictory, game) => {
                 for (let client of game.getAllClients()) {
@@ -136,7 +139,7 @@ class MainController {
                         "client_score": winner.score
                     }, game);
                     let newRoundHandler = this.newRound.bind(this);
-                    setTimeout(newRoundHandler(message.game_name), 15000);
+                    setTimeout(newRoundHandler(message.game_id), 15000);
                 }
             });
             game.swapTiles(message.client_id, message.tile_swap, victory);
@@ -149,6 +152,21 @@ class MainController {
             "client_id": message.client_id
         });
     }
+    removeGame(id) {
+        console.log(`Removed game with id ${id} due to inactivity.`);
+        let index = this.games.findIndex((game) => id === game.id);
+        if (index)
+            this.games = this.games.splice(index, 1);
+    }
+    updateTimeout(id) {
+        let timeoutHandler = (id) => {
+            this.removeGame.bind(this);
+            return this.removeGame(id);
+        };
+        return setTimeout(() => {
+            return timeoutHandler(id);
+        }, 60000);
+    }
     startNewGame(message) {
         // create a new game
         let newGame = new game_class_1.Game(message.game.mode, message.game.name, this.websocketService, message.game.difficulty);
@@ -157,6 +175,8 @@ class MainController {
         console.log(`Game ${newGame.name} started!`);
         // add this client to the game
         newGame.addClient(message.client_id, message.client_name);
+        // set timeout to remove game after ten minutes of inactivity
+        newGame.timeout = this.updateTimeout(newGame.id);
         this.websocketService.broadcastMessageInGame({
             "event": "player_joined",
             "client_id": message.client_id,

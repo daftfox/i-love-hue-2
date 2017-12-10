@@ -1,8 +1,9 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const helper_class_1 = require("./helper.class");
 class Client {
-    constructor(id, name, webSocket) {
-        this.id = id;
+    constructor(name, webSocket) {
+        this.id = helper_class_1.Helper.generateId();
         this.name = name;
         this.score = 0;
         this.tileSwaps = 0;
@@ -40,14 +41,6 @@ class Client {
         // reassign tiles. changes object reference, thus triggering the board's onChange() method
         this.tiles = tilesCopy;
         this.tileSwaps++;
-    }
-    static generateId() {
-        let text = "";
-        let range = "ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789";
-        for (let i = 0; i < 5; i++) {
-            text += range.charAt(Math.floor(Math.random() * range.length));
-        }
-        return text;
     }
 }
 exports.Client = Client;

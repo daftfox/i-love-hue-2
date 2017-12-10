@@ -1,0 +1,81 @@
+.player-list {
+  padding: 10px;
+}
+
+.m-b {
+  margin-bottom: 10px;
+}
+
+.message-list {
+  padding: 10px;
+}
+
+.player-list {
+  font-size: 2em;
+  height:    20vh;
+}
+
+.player-list .player-names{
+  background-color: white;
+  border:           1px solid darkgray;
+  border-radius:    3px;
+  overflow-y:       auto;
+  height:           calc(100% - 2.5rem);
+}
+
+.message-list {
+  height:      65vh;
+  padding-top: 10px;
+  font-size:    2em;
+}
+
+.message-list .messages {
+  height:        calc(100% - 3em);
+  border:        1px solid darkgray;
+  border-radius: 3px;
+  background:    white;
+  width:         100%;
+  overflow:      hidden;
+}
+
+.message-list .messages div {
+  padding: 0 15px;
+  color:   darkgray;
+}
+
+.message-list .messages div.self {
+   color:        limegreen;
+   border-color: limegreen;
+}
+
+.message-list .messages div div {
+  margin:        0 0 5px;
+  padding:       0;
+}
+
+.message-list .messages div p {
+  padding-left:  5px;
+  color:         inherit;
+  margin-bottom: 0;
+  border-width:  1px;
+  border-style:  dashed;
+  border-color:  inherit;
+  border-radius: 10px;
+}
+
+.message-list .send-message {
+  height: 2em;
+  width:  100%;
+}
+
+.message-list .send-message div:nth-child(1) {
+  padding: 0.1em 0;
+}
+
+.message-list .send-message div:nth-child(1) input {
+  max-width: initial;
+}
+
+.message-list .send-message button {
+  float: right;
+}

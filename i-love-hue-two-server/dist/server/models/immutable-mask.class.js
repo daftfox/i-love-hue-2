@@ -1,5 +1,6 @@
 "use strict";
 Object.defineProperty(exports, "__esModule", { value: true });
+const helper_class_1 = require("./helper.class");
 class Pattern {
     constructor(name) {
         this.name = name;
@@ -60,7 +61,7 @@ class ImmutableMask {
         // use supplied pattern or select one at random
         let pattern = this.patterns.find((p) => input === p.name);
         if (!pattern) {
-            let randomNum = ImmutableMask.rng(0, this.patterns.length - 1);
+            let randomNum = helper_class_1.Helper.rng(0, this.patterns.length - 1);
             pattern = this.patterns[randomNum];
             console.log(`Randomly selected pattern ${pattern.name}`);
         }
@@ -111,9 +112,6 @@ class ImmutableMask {
             console.log("oops...");
         }
         return mask;
-    }
-    static rng(min, max) {
-        return Math.floor(Math.random() * (max - min + 1) + min);
     }
 }
 exports.ImmutableMask = ImmutableMask;

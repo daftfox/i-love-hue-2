@@ -1,4 +1,5 @@
 import { Tile } from './tile.class';
+import {Helper} from './helper.class';
 
 export class Pattern {
   name:        string;
@@ -80,7 +81,7 @@ export class ImmutableMask {
     // use supplied pattern or select one at random
     let pattern = this.patterns.find((p) => input === p.name);
     if (!pattern) {
-      let randomNum = ImmutableMask.rng(0, this.patterns.length-1);
+      let randomNum = Helper.rng(0, this.patterns.length-1);
       pattern = this.patterns[randomNum];
       console.log(`Randomly selected pattern ${pattern.name}`);
     }
@@ -162,9 +163,5 @@ export class ImmutableMask {
       console.log("oops...");
     }
     return mask;
-  }
-
-  public static rng(min: number, max: number): number {
-    return Math.floor(Math.random()*(max-min+1)+min);
   }
 }

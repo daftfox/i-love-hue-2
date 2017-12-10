@@ -18,6 +18,12 @@
             <input id="url" type="text" [(ngModel)]="customUrl.value" />
           </div>
 
+          <div *ngIf="connectionError"
+               class="col-12">
+            <p class="peach">There was an error connecting to the supplied url.</p>
+            <p><small>Keep in mind: the server url should look like this: ws://192.168.1.1:8999</small></p>
+          </div>
+
           <div class="col-6 text-right m-t-3">
             <label for="player-name">Player name: <small>(required)</small></label>
           </div>
@@ -56,14 +62,14 @@
             <input id="game-name" class="" type="text" #gameName />
           </div>
 
-          <div class="col-12 text-center m-t-3">
+          <div class="col-6 text-center m-t-3">
             <div>Game difficulty: </div>
             <input class="" type="radio" value="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
             <input class="" type="radio" value="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
             <input class="" type="radio" value="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
           </div>
 
-          <div class="col-12 text-center m-t-3">
+          <div class="col-6 text-center m-t-3">
             <div>Board size: </div>
             <input class="" type="radio" value="0" name="mode" [(ngModel)]="mode" /> 8x8
             <input class="" type="radio" value="1" name="mode" [(ngModel)]="mode" /> 10x10
@@ -79,12 +85,18 @@
             </button>
           </div>
 
+          <div class="col-12">
+            Now online: {{globalPlayers.length}}
+          </div>
+
           <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
             <span>Game: <small>(select one to join)</small></span>
             <select [(ngModel)]="selectedGame">
-              <option value="{{game}}"
+              <option value="{{game.id}}"
                       name="selectedServer"
-                      *ngFor="let game of games">{{game}}</option>
+                      *ngFor="let game of games">
+                {{game.name}}
+              </option>
             </select>
           </div>
           <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
@@ -140,8 +152,18 @@
 
     <div id="lobby"
          class="col-3 hidden-lg-down">
-      <div class="row game-lobby no-gutters align-items-center"
-           *ngIf="lobby">
+      <div [@swipeInOut]
+           *ngIf="select"
+           class="row server-lobby no-gutters align-items-center">
+        <server-lobby [globalMessages]="globalMessages"
+                      [globalPlayers]="globalPlayers"
+                      [self]="self"
+                      (sendMessage)="sendChatMessage($event)">
+        </server-lobby>
+      </div>
+      <div [@swipeInOut]
+           *ngIf="lobby"
+           class="row game-lobby no-gutters align-items-center">
         <div class="col-12"
              *ngFor="let player of players">
           <div class="col-12 opponent-info"
@@ -153,7 +175,8 @@
           </div>
         </div>
       </div>
-      <div *ngIf="play">
+      <div [@swipeInOut]
+           *ngIf="play">
         <div *ngFor="let player of players" class="col-lg-10 col-xl-8 mini-view">
           <play-field [ownBoard]="false"
                       [gameOver]="gameOver()"

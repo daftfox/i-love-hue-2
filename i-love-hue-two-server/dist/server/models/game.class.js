@@ -3,6 +3,7 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const map_class_1 = require("./map.class");
 const timers_1 = require("timers");
 const immutable_mask_class_1 = require("./immutable-mask.class");
+const helper_class_1 = require("./helper.class");
 class GameMode {
     constructor(rows, columns) {
         this.rows = rows;
@@ -13,15 +14,16 @@ exports.GameMode = GameMode;
 class Game {
     constructor(mode, name, websocketService, difficulty) {
         this.clients = [];
-        this.name = name || 'Game' + immutable_mask_class_1.ImmutableMask.rng(0, 99);
+        this.name = name || 'Game' + helper_class_1.Helper.rng(0, 99);
         this.mode = Game.GAMEMODE[mode];
         this.im = new immutable_mask_class_1.ImmutableMask(this.mode.rows, this.mode.columns, difficulty);
         this.websocketService = websocketService;
         this.map = this.generateMap();
         this.state = 'ready';
+        this.id = helper_class_1.Helper.generateId();
     }
     generateMap() {
-        return new map_class_1.Map(this.mode.rows, this.mode.columns, ...Game.COLORSETS[immutable_mask_class_1.ImmutableMask.rng(0, Game.COLORSETS.length - 1)]);
+        return new map_class_1.Map(this.mode.rows, this.mode.columns, ...Game.COLORSETS[helper_class_1.Helper.rng(0, Game.COLORSETS.length - 1)]);
     }
     newRound(callback) {
         this.map = this.generateMap();

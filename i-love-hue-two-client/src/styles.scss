@@ -34,10 +34,11 @@ body.dark-background {
 }
 
 input[type="text"] {
+  padding-left:  4px;
   border-radius: 3px;
-  border-width: 1px;
-  width: 100%;
-  max-width: 200px;
+  border-width:  1px;
+  width:         100%;
+  max-width:     200px;
 
   &:focus {
     outline-color: $peach;
@@ -150,12 +151,17 @@ h3 {
 #lobby{
   height:     100vh;
   font-size:  .5em;
+  // background: blue;
+
+
 
   .mini-view {
+    // background: red;
     height:     33vh;
     padding:    10px;
 
     play-field {
+      //background: yellow;
       height:     100%;
       display:    block;
     }
@@ -171,6 +177,88 @@ h3 {
         display: inline-block;
       }
     }
+  }
+
+  .server-lobby {
+    height: 100%;
+
+    server-lobby {
+      display: block;
+      width:   100%;
+    }
+
+    /*.player-list {
+      padding: 10px;
+    }
+
+    .message-list {
+      padding:       10px;
+    }
+
+    .player-list {
+      font-size:        2em;
+      height:           20vh;
+
+      .player-names{
+        background-color: white;
+        border:           1px solid darkgray;
+        border-radius:    3px;
+        overflow-y:       auto;
+        height:           calc(100% - 2.5rem);
+      }
+    }
+
+    .message-list {
+      height:      65vh;
+      padding-top: 10px;
+      font-size:   2em;
+
+      .messages {
+        height:        calc(100% - 3em);
+        border:        1px solid darkgray;
+        border-radius: 3px;
+        background:    white;
+        width:         100%;
+        overflow-y:    hidden;
+
+        div {
+          padding: 0 15px;
+          color:   darkgray;
+
+          &.self {
+            color:        limegreen;
+            border-color: limegreen;
+          }
+
+          div {
+            margin:        0 0 5px;
+            padding:       0;
+          }
+
+          p {
+            padding-left:  5px;
+            color:         inherit;
+            margin-bottom: 0;
+            border-width:  1px;
+            border-style:  dashed;
+            border-color:  inherit;
+            border-radius: 10px;
+          }
+        }
+      }
+
+      .send-message {
+        height: 2em;
+
+        div:nth-child(1) {
+          padding: 0.1em 0;
+        }
+
+        button {
+          float: right;
+        }
+      }
+    }*/
   }
 }
 

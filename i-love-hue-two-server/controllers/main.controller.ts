@@ -39,15 +39,15 @@ export class MainController {
         );
     }
 
-    private getGame(name: string): Game | void {
-        let game = this.games.find((game) => game.name === name);
+    private getGame(id: string): Game | void {
+        let game = this.games.find((game) => game.id === id);
         if (game) {
             return game;
         }
     }
 
     private playerReady(message: any): void {
-        let game = this.getGame(message.game_name);
+        let game = this.getGame(message.game_id);
         if (game) {
             let clients = game.getAllClients();
             let client = game.getClient(message.client_id);
@@ -56,7 +56,7 @@ export class MainController {
                 this.websocketService.sendMessageToClient(
                     client.id,
                     {
-                        "event": (client.isReady ? "player_ready" : "player_not_ready"),
+                        "event":     (client.isReady ? "player_ready" : "player_not_ready"),
                         "client_id": message.client_id
                     }
                 );
@@ -65,7 +65,7 @@ export class MainController {
     }
 
     private playerJoinGame(message: any): void {
-        let game = this.getGame(message.game_name);
+        let game = this.getGame(message.game_id);
         if (game) {
             game.addClient(message.client_id, message.client_name);
             let clients = game.getAllClients();
@@ -76,12 +76,12 @@ export class MainController {
                 this.websocketService.sendMessageToClient(
                     newPlayer.id,
                     {
-                        "event": "player_joined",
-                        "client_id": client.id,
-                        "client_name": client.name,
+                        "event":        "player_joined",
+                        "client_id":    client.id,
+                        "client_name":  client.name,
                         "client_ready": client.isReady,
                         "client_tiles": client.tiles,
-                        "game_name": message.game_name
+                        "game_name":    message.game_name
                     }
                 );
 
@@ -89,12 +89,12 @@ export class MainController {
                 this.websocketService.sendMessageToClient(
                     client.id,
                     {
-                        "event": "player_joined",
-                        "client_id": newPlayer.id,
-                        "client_name": newPlayer.name,
+                        "event":        "player_joined",
+                        "client_id":    newPlayer.id,
+                        "client_name":  newPlayer.name,
                         "client_ready": false,
                         "client_tiles": newPlayer.tiles,
-                        "game_name": message.game_name
+                        "game_name":    message.game_name
                     }
                 );
             }
@@ -102,7 +102,7 @@ export class MainController {
     }
 
     private initiateGame(message: any): void {
-        let game = this.getGame(message.game_name);
+        let game = this.getGame(message.game_id);
         if (game) {
             let initiate = ((game: Game) => {
                 let clients = game.getAllClients().map((c) => {
@@ -110,7 +110,7 @@ export class MainController {
                 });
                 this.websocketService.broadcastMessageInGame (
                     {
-                        "event": "initiate_game",
+                        "event":   "initiate_game",
                         "players": clients
                     },
                     game
@@ -120,8 +120,8 @@ export class MainController {
         }
     }
 
-    private newRound(gameName: string): void {
-        let game = this.getGame(gameName);
+    private newRound(gameId: string): void {
+        let game = this.getGame(gameId);
         if (game) {
             let newRound = ((game: Game) => {
                 let clients = game.getAllClients().map((c) => {
@@ -130,7 +130,7 @@ export class MainController {
                 });
                 this.websocketService.broadcastMessageInGame(
                     {
-                        "event": "initiate_game",
+                        "event":   "initiate_game",
                         "players": clients
                     },
                     game
@@ -141,7 +141,12 @@ export class MainController {
     }
 
     private playerTileSwap(message: any): void {
-        let game = this.getGame(message.game_name);
+        let game = <Game>this.getGame(message.game_id);
+
+        // update timeout so game does not get removed for another ten minutes
+        clearTimeout(game.timeout);
+        this.updateTimeout(game.id);
+
         if (game) {
             let victory = ((playerVictory: boolean, game: Game) => {
                 for (let client of game.getAllClients()) {
@@ -149,12 +154,12 @@ export class MainController {
                         this.websocketService.sendMessageToClient(
                             client.id,
                             {
-                                "event": "player_tile_swap",
-                                "client_id": message.client_id,
+                                "event":      "player_tile_swap",
+                                "client_id":  message.client_id,
                                 "tile_swaps": message.tile_swaps,
                                 "tile_swap": {
                                     "from": message.tile_swap.from,
-                                    "to": message.tile_swap.to
+                                    "to":   message.tile_swap.to
                                 }
                             }
                         );
@@ -166,14 +171,14 @@ export class MainController {
                     winner.incrementScore();
                     this.websocketService.broadcastMessageInGame(
                         {
-                            "event": "player_win",
-                            "client_id": message.client_id,
+                            "event":        "player_win",
+                            "client_id":    message.client_id,
                             "client_score": winner.score
                         },
                         game
                     );
                     let newRoundHandler = this.newRound.bind(this);
-                    setTimeout(newRoundHandler(message.game_name), 15000);
+                    setTimeout(newRoundHandler(message.game_id), 15000);
                 }
             });
             game.swapTiles(message.client_id, message.tile_swap, victory);
@@ -184,10 +189,27 @@ export class MainController {
         //this.game.removeClient(message.client_id);
         this.websocketService.broadcastMessage(
             {
-                "event": "player_forfeit",
+                "event":     "player_forfeit",
                 "client_id": message.client_id
             }
         );
+    }
+
+    private removeGame(id: string): void {
+        console.log(`Removed game with id ${id} due to inactivity.`);
+        let index = this.games.findIndex((game) => id === game.id);
+        if (index) this.games = this.games.splice(index, 1);
+    }
+
+    private updateTimeout(id: string): any {
+        let timeoutHandler = (id: string) => {
+            this.removeGame.bind(this);
+            return this.removeGame(id);
+        };
+
+        return setTimeout(() => {
+            return timeoutHandler(id);
+        }, 60000);
     }
 
     private startNewGame(message: any): void {
@@ -199,22 +221,26 @@ export class MainController {
 
         // add this client to the game
         newGame.addClient(message.client_id, message.client_name);
+
+        // set timeout to remove game after ten minutes of inactivity
+        newGame.timeout = this.updateTimeout(newGame.id);
+
         this.websocketService.broadcastMessageInGame (
             {
-                "event": "player_joined",
-                "client_id": message.client_id,
+                "event":       "player_joined",
+                "client_id":   message.client_id,
                 "client_name": message.client_name,
-                "game_name": newGame.name
+                "game_name":   newGame.name
             },
             newGame
         );
         let games = this.games.map((game) => game.name);
         this.websocketService.broadcastMessage (
             {
-                "event": "new_game_launched",
-                "client_id": message.client_id,
+                "event":       "new_game_launched",
+                "client_id":   message.client_id,
                 "client_name": message.client_name,
-                "games": games
+                "games":       games
             }
         );
     }

@@ -1,10 +1,36 @@
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <meta charset="UTF-8">
-    <title>$Title$</title>
-</head>
-<body>
-$END$
-</body>
-</html>
+<div class="col-12">
+  <div class="row player-list no-gutters">
+    <div class="col-12">
+      <div class="col-12 player-names">
+        <div *ngFor="let player of globalPlayers"
+             class="row">
+          <span>{{player}}</span>
+        </div>
+      </div>
+      <small>Online now: {{globalPlayers.length}}</small>
+    </div>
+  </div>
+  <div class="row message-list no-gutters">
+    <div class="col-12 messages"
+         [@listAnimation]="globalMessages.length">
+      <div *ngFor="let message of globalMessages; let i = index"
+           class="col-12 m-b"
+           [ngClass]="{'self': message.client_id === self.id}">
+        <div class="col-12"
+             *ngIf="i === 0 || (globalMessages[i - 1] && globalMessages[i - 1].client_id !== message.client_id)">
+          {{message.sender}}:
+        </div>
+        <p>
+          {{message.chat_message}}
+        </p>
+      </div>
+    </div>
+    <div class="row send-message no-gutters">
+      <div class="col-12">
+        <input type="text"
+               (keyup.enter)="send()"
+               [(ngModel)]="chatMessage" />
+      </div>
+    </div>
+  </div>
+</div>
