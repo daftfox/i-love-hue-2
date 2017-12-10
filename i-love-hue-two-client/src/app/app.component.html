@@ -85,10 +85,6 @@
             </button>
           </div>
 
-          <div class="col-12">
-            Now online: {{globalPlayers.length}}
-          </div>
-
           <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
             <span>Game: <small>(select one to join)</small></span>
             <select [(ngModel)]="selectedGame">
