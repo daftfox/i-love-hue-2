@@ -109,7 +109,7 @@ export class AppComponent {
             this.gameId = message.game_id;
             this.gameName = message.game_name;
           } else {
-            let newPlayer = new Client(message.client_id, message.client_name);
+            let newPlayer = new Client(message.client_name);
             newPlayer.setTiles(message.client_tiles);
             newPlayer.isReady = message.client_ready;
             this.players.push(newPlayer);

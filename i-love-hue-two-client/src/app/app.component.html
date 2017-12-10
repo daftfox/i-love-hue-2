@@ -90,13 +90,16 @@
             <select [(ngModel)]="selectedGame">
               <option value="{{game.id}}"
                       name="selectedServer"
-                      *ngFor="let game of games">
+                      [selected]="last"
+                      *ngFor="let game of games; let last = last">
                 {{game.name}}
               </option>
             </select>
           </div>
           <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
             <button class="btn btn-lg btn-outline-primary"
+                    [ngClass]="{'disabled': !selectedGame}"
+                    [disabled]="!selectedGame"
                     (click)="joinGame()">
               <span>Join game</span>
             </button>
