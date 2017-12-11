@@ -24,6 +24,7 @@ export class Game {
     chatMessages:     Array<any> = [];
     state:            string;
     time:             number;
+    difficulty:       number;
     clock:            any;
     timeout:          any;
     websocketService: WebsocketService;
@@ -52,8 +53,8 @@ export class Game {
                 difficulty:       number) {
         this.name             = name || 'Game'+Helper.rng(0, 99);
         this.mode             = Game.GAMEMODE[mode];
-        this.im               = new ImmutableMask(this.mode.rows, this.mode.columns, difficulty);
         this.websocketService = websocketService;
+        this.difficulty       = difficulty;
         this.map              = this.generateMap();
         this.state            = 'ready';
         this.id               = Helper.generateId();
@@ -63,6 +64,7 @@ export class Game {
         return new Map(
             this.mode.rows,
             this.mode.columns,
+            new ImmutableMask(this.mode.rows, this.mode.columns, this.difficulty),
             ...Game.COLORSETS[Helper.rng(0, Game.COLORSETS.length - 1)]
         );
     }
@@ -76,21 +78,15 @@ export class Game {
 
     public initiate(callback: any): void {
         this.state = 'initiated';
-        this.startClock();
+        //this.startClock();
 
         this.generateAndSetTiles();
-
         callback(this);
     }
 
     private generateAndSetTiles() {
-        let tiles = this.im.maskTiles(this.map.tiles);
-
-        // this is the solution, keep it safe you hear!
-        this.map.setSolution(tiles);
-
         for (let client of this.clients) {
-            client.setTiles(this.im.scrambleTiles(tiles));
+            client.setTiles(this.map.getScrambledTiles());
         }
     }
 

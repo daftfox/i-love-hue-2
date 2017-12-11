@@ -3,13 +3,14 @@ Object.defineProperty(exports, "__esModule", { value: true });
 const tile_class_1 = require("./tile.class");
 const tinygradient = require('tinygradient');
 class Map {
-    constructor(rows, columns, ...colors) {
+    constructor(rows, columns, immutableMask, ...colors) {
         this.rows = rows;
         this.columns = columns;
         this.colorTopLeft = colors[0];
         this.colorTopRight = colors[1];
         this.colorBottomLeft = colors[2];
         this.colorBottomRight = colors[3];
+        this.immutableMask = immutableMask;
         // first generate a two dimensional gradient map
         this.generateGradientMap();
         // secondly, generate the tiles
@@ -23,6 +24,11 @@ class Map {
                 this.tiles.push(tile);
             }
         }
+        this.tiles = this.immutableMask.maskTiles(this.tiles);
+        this.solution = this.tiles;
+    }
+    getScrambledTiles() {
+        return this.immutableMask.scrambleTiles(this.tiles);
     }
     generateGradientMap() {
         let map = [];
@@ -37,8 +43,8 @@ class Map {
     }
     checkSolution(tiles) {
         for (let i = 0; i < tiles.length; i++) {
-            if ((tiles[i].x !== this.solution[i].x) ||
-                (tiles[i].y !== this.solution[i].y)) {
+            if ((tiles[i].x !== this.tiles[i].x) ||
+                (tiles[i].y !== this.tiles[i].y)) {
                 return false;
             }
         }
@@ -82,9 +88,6 @@ class Map {
     }
     setColor(x, y) {
         return this.pickColorFromGradientMap(x, y);
-    }
-    setSolution(solution) {
-        this.solution = solution;
     }
     pickColorFromGradientMap(x, y) {
         return this.gradientMap[y - 1][x - 1].toHexString();

@@ -1,7 +1,8 @@
 import { Component } from '@angular/core';
 import { MessageService } from './services/message.service';
 import { Client } from '../../../i-love-hue-two-server/models/client.class';
-import {Helper} from "../../../i-love-hue-two-server/models/helper.class";
+import { Helper } from '../../../i-love-hue-two-server/models/helper.class';
+import { Tile } from '../../../i-love-hue-two-server/models/tile.class';
 /* import { trigger, style, transition, animate } from '@angular/animations'; */
 
 @Component({
@@ -50,6 +51,7 @@ export class AppComponent {
   mode:             number = 0;
   celebrations:     string;
   selectedGame:     string;
+  solution:         any = {tiles: null};
 
   constructor(){
     this.setState('splash');
@@ -100,20 +102,26 @@ export class AppComponent {
         case 'connect_succesful':
           this.setState('select');
           this.setSelf(message.client_id, playerName);
-          this.games = message.games;
+
+          this.games         = message.games;
           this.globalPlayers = message.global_players.map((player) => { return {name: player}; });
           break;
         case 'player_joined':
           if (message.client_id === this.self.id) {
             this.setState('lobby');
-            this.gameId   = message.game_id;
-            this.gameName = message.game_name;
-            this.messages = message.chat_messages || [];
+
+            this.gameId         = message.game_id;
+            this.gameName       = message.game_name;
+            this.messages       = message.chat_messages || [];
+            if (message.solution) {
+              this.solution.tiles = message.solution;
+            }
           } else {
             let newPlayer = new Client(message.client_name);
-            this.players.push(newPlayer);
+            newPlayer.id = message.client_id;
             newPlayer.setTiles(message.client_tiles);
             newPlayer.isReady = message.client_ready;
+            this.players.push(newPlayer);
           }
           break;
         case 'initiate_game':
@@ -166,7 +174,10 @@ export class AppComponent {
   }
 
   endGame(message: any): void {
+    console.log(this.self.id);
+    console.log(message.client_id);
     this.celebrations = (message.client_id === this.self.id ? 'win' : 'lose');
+    console.log(this.celebrations);
     this.setCountdown('00:15');
     this.players.find((player) => player.id === message.client_id).incrementScore();
   }
@@ -257,7 +268,10 @@ export class AppComponent {
   }
 
   togglePlayerReady(id: string): void {
-    this.players.find((player) => player.id === id).toggleReady();
+    console.log(this.players);
+    console.log(id);
+    let player = this.players.find((player) => player.id === id);
+    player.toggleReady();
   }
 
   startGame(): void {
@@ -305,7 +319,6 @@ export class AppComponent {
   }
 
   tileSwap(player: Client, tileSwap: any): void {
-    console.log('swap!');
     if (this.celebrations) {
       // the game is over, no more swaps!
       return;
@@ -325,13 +338,9 @@ export class AppComponent {
     tilesCopy[tile2Index].x = player.tiles[tile1Index].x;
     tilesCopy[tile2Index].y = player.tiles[tile1Index].y;
 
-
     // reassign tiles. changes object reference, thus triggering the board's onChange() method
     player.setTiles(tilesCopy);
     player.tileSwaps++;
-
-    console.log(this.self.id);
-    console.log(player.id);
 
     if (this.self.id === player.id) {
       this.sendMessage(

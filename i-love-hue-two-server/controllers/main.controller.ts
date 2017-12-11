@@ -73,7 +73,6 @@ export class MainController {
             game.addClient(message.client_id, message.client_name);
             let clients = game.getAllClients();
             let newPlayer = game.getClient(message.client_id);
-
             for (let client of clients) {
 
                 // send new player a list of all players already in the lobby
@@ -85,6 +84,7 @@ export class MainController {
                         "client_name":   client.name,
                         "client_ready":  client.isReady,
                         "client_tiles":  client.tiles,
+                        "solution":      game.map.solution,
                         "chat_messages": game.chatMessages,
                         "game_name":     game.name,
                         "game_id":       game.id
@@ -132,17 +132,19 @@ export class MainController {
         let game = this.getGame(gameId);
         if (game) {
             let newRound = ((game: Game) => {
-                let clients = game.getAllClients().map((c) => {
-                    c.tileSwaps = 0;
-                    return {id: c.id, tiles: c.tiles}
+                game.newRound(() => {
+                    let clients = game.getAllClients().map((c) => {
+                        c.tileSwaps = 0;
+                        return {id: c.id, tiles: c.tiles}
+                    });
+                    this.websocketService.broadcastMessageInGame(
+                        {
+                            "event":   "initiate_game",
+                            "players": clients
+                        },
+                        game
+                    );
                 });
-                this.websocketService.broadcastMessageInGame(
-                    {
-                        "event":   "initiate_game",
-                        "players": clients
-                    },
-                    game
-                );
             });
             newRound(game);
         }
@@ -175,7 +177,7 @@ export class MainController {
                 }
                 if (playerVictory) {
                     let winner = game.getClient(message.client_id);
-                    game.stopClock();
+                    //game.stopClock();
                     winner.incrementScore();
                     this.websocketService.broadcastMessageInGame(
                         {
@@ -185,8 +187,14 @@ export class MainController {
                         },
                         game
                     );
-                    let newRoundHandler = this.newRound.bind(this);
-                    setTimeout(newRoundHandler(message.game_id), 15000);
+                    let newRoundHandler = (id: string) => {
+                        let newRound  = this.newRound.bind(this);
+                        return newRound(id);
+                    };
+
+                    setTimeout(() => {
+                        return newRoundHandler(message.game_id)
+                    }, 15000);
                 }
             });
             game.swapTiles(message.client_id, message.tile_swap, victory);
@@ -236,8 +244,8 @@ export class MainController {
 
     private updateTimeout(id: string): any {
         let timeoutHandler = (id: string) => {
-            this.endGame.bind(this);
-            return this.endGame(id);
+            let endGame = this.endGame.bind(this);
+            return endGame(id);
         };
 
         return setTimeout(() => {
@@ -258,12 +266,12 @@ export class MainController {
 
         // set timeout to remove game after ten minutes of inactivity (no tile-swaps)
         newGame.timeout = this.updateTimeout(newGame.id);
-
         this.websocketService.broadcastMessageInGame (
             {
                 "event":       "player_joined",
                 "client_id":   message.client_id,
                 "client_name": message.client_name,
+                "solution":    newGame.map.solution,
                 "game_name":   newGame.name,
                 "game_id":     newGame.id
             },

@@ -1,4 +1,5 @@
 import { Tile }    from './tile.class';
+import {ImmutableMask} from "./immutable-mask.class";
 const tinygradient = require('tinygradient');
 
 export class Map {
@@ -11,10 +12,12 @@ export class Map {
     
     public  tiles:                Tile[];
     public  solution:             Tile[];
+    public  immutableMask:        ImmutableMask;
     private gradientMap:          Array<any>;
 
     constructor(rows:             number,
                 columns:          number,
+                immutableMask:    ImmutableMask,
                 ...colors:        Array<string>
     ) {
         this.rows                 = rows;
@@ -23,6 +26,7 @@ export class Map {
         this.colorTopRight        = colors[1];
         this.colorBottomLeft      = colors[2];
         this.colorBottomRight     = colors[3];
+        this.immutableMask        = immutableMask;
 
         // first generate a two dimensional gradient map
         this.generateGradientMap();
@@ -39,6 +43,12 @@ export class Map {
                 this.tiles.push(tile);
             }
         }
+        this.tiles    = this.immutableMask.maskTiles(this.tiles);
+        this.solution = this.tiles;
+    }
+
+    public getScrambledTiles(): Tile[] {
+        return this.immutableMask.scrambleTiles(this.tiles)
     }
 
     private generateGradientMap(): void {
@@ -58,8 +68,8 @@ export class Map {
 
     public checkSolution(tiles: Tile[]): boolean {
         for (let i = 0; i < tiles.length; i++) {
-            if ((tiles[i].x !== this.solution[i].x) ||
-                (tiles[i].y !== this.solution[i].y)) {
+            if ((tiles[i].x !== this.tiles[i].x) ||
+                (tiles[i].y !== this.tiles[i].y)) {
                 return false;
             }
         }
@@ -109,10 +119,6 @@ export class Map {
 
     private setColor(x: number, y: number): string {
         return this.pickColorFromGradientMap(x, y);
-    }
-
-    public setSolution(solution: Tile[]): void {
-        this.solution = solution;
     }
 
     private pickColorFromGradientMap(x: number, y: number): string {

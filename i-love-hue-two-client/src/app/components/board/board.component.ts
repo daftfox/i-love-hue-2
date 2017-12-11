@@ -45,19 +45,18 @@ export class BoardComponent implements OnInit, OnChanges {
   ngOnChanges(changes: any) {
     if (changes && changes.tiles) {
       if (this.board && !changes.tiles.previousValue) {
-        this.addTiles();
+        this.addTiles();                    // started a new game
       } else if (this.board) {
-        if (!this.ownBoard &&               // update for someone else's board
-            changes.tiles &&
-            changes.tiles.previousValue &&
-            changes.tiles.currentValue) {
+        if (!this.ownBoard){               // for someone else's board
           this.swappedTiles = this.getOpponentsSwappedTiles(changes.tiles.previousValue, changes.tiles.currentValue);
-          this.updateTiles();
-        } else if (changes.tiles &&         // new round, new chances!
-                   changes.tiles.previousValue[0].id !== changes.tiles.currentValue[0].id) {
-          this.addTiles();
-        } else {
-          this.updateTiles();
+        }
+        if (changes.tiles.previousValue &&
+            changes.tiles.currentValue) {
+          if (changes.tiles.previousValue[0].id !== changes.tiles.currentValue[0].id) {
+            this.addTiles();
+          } else {
+            this.updateTiles()
+          }
         }
       }
     }
@@ -186,7 +185,7 @@ export class BoardComponent implements OnInit, OnChanges {
       .enter()
       .append('circle')
       .attr('cx', (d) => (d.x * this.tileSize.width) - this.tileSize.width / 2)
-      .attr('cy', (d) => (d.y * this.tileSize.height) - this.tileSize.width / 2)
+      .attr('cy', (d) => (d.y * this.tileSize.height) - this.tileSize.height / 2)
       .attr('r', (d) => (d.immutable ? this.tileSize.width / 10 : 0))
       .style('fill-opacity', 0)
       .transition()

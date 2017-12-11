@@ -67,6 +67,7 @@ class MainController {
                     "client_name": client.name,
                     "client_ready": client.isReady,
                     "client_tiles": client.tiles,
+                    "solution": game.map.solution,
                     "chat_messages": game.chatMessages,
                     "game_name": game.name,
                     "game_id": game.id
@@ -104,14 +105,16 @@ class MainController {
         let game = this.getGame(gameId);
         if (game) {
             let newRound = ((game) => {
-                let clients = game.getAllClients().map((c) => {
-                    c.tileSwaps = 0;
-                    return { id: c.id, tiles: c.tiles };
+                game.newRound(() => {
+                    let clients = game.getAllClients().map((c) => {
+                        c.tileSwaps = 0;
+                        return { id: c.id, tiles: c.tiles };
+                    });
+                    this.websocketService.broadcastMessageInGame({
+                        "event": "initiate_game",
+                        "players": clients
+                    }, game);
                 });
-                this.websocketService.broadcastMessageInGame({
-                    "event": "initiate_game",
-                    "players": clients
-                }, game);
             });
             newRound(game);
         }
@@ -138,15 +141,20 @@ class MainController {
                 }
                 if (playerVictory) {
                     let winner = game.getClient(message.client_id);
-                    game.stopClock();
+                    //game.stopClock();
                     winner.incrementScore();
                     this.websocketService.broadcastMessageInGame({
                         "event": "player_win",
                         "client_id": message.client_id,
                         "client_score": winner.score
                     }, game);
-                    let newRoundHandler = this.newRound.bind(this);
-                    setTimeout(newRoundHandler(message.game_id), 15000);
+                    let newRoundHandler = (id) => {
+                        let newRound = this.newRound.bind(this);
+                        return newRound(id);
+                    };
+                    setTimeout(() => {
+                        return newRoundHandler(message.game_id);
+                    }, 15000);
                 }
             });
             game.swapTiles(message.client_id, message.tile_swap, victory);
@@ -169,7 +177,6 @@ class MainController {
         if (index)
             this.games.splice(index, 1);
         this.websocketService.removeGame(id);
-        console.log(id);
         console.log(`Removed game with id ${id}.`);
     }
     endGame(id) {
@@ -185,8 +192,8 @@ class MainController {
     }
     updateTimeout(id) {
         let timeoutHandler = (id) => {
-            this.endGame.bind(this);
-            return this.endGame(id);
+            let endGame = this.endGame.bind(this);
+            return endGame(id);
         };
         return setTimeout(() => {
             return timeoutHandler(id);
@@ -206,6 +213,7 @@ class MainController {
             "event": "player_joined",
             "client_id": message.client_id,
             "client_name": message.client_name,
+            "solution": newGame.map.solution,
             "game_name": newGame.name,
             "game_id": newGame.id
         }, newGame);

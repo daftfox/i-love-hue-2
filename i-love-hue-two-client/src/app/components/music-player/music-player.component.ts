@@ -8,9 +8,9 @@ import { Helper } from '../../../../../i-love-hue-two-server/models/helper.class
 })
 
 export class MusicPlayerComponent {
-  soundTrack: any;
+  soundTrack:   any;
   currentTrack: number;
-  play:       boolean;
+  play:         boolean = false;
   soundTracks = [
     'Blue_Dot_Sessions_-_01_-_Yarrow_and_Root.mp3',
     'Blue_Dot_Sessions_-_02_-_The_Wooden_Platform.mp3',
@@ -25,8 +25,8 @@ export class MusicPlayerComponent {
     this.currentTrack = Helper.rng(0, this.soundTracks.length - 1);
     this.soundTrack.src = `./assets/sound-tracks/${this.soundTracks[this.currentTrack]}`;
     this.soundTrack.load();
-    this.soundTrack.play();
-    this.play = true;
+    //this.soundTrack.play();
+    //this.play = true;
 
     this.soundTrack.addEventListener('ended', this.nextSong.bind(this));
   }

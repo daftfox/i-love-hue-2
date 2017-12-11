@@ -4,7 +4,7 @@
          class="col-12"
          [ngClass]="{'col-lg-6': splash || select || lobby, 'col-lg-9': play}">
       <div class="row justify-content-center"
-           *ngIf="!play">
+           *ngIf="!play && !lobby">
         <title-header></title-header>
       </div>
       <div class="splash-screen"
@@ -102,15 +102,19 @@
       </div>
 
       <div *ngIf="lobby"
-           class="lobby">
+           class="game-lobby">
         <div class="row">
           <div class="col-12 text-center m-t-3">
             <h2>Get ready for {{gameName}}!</h2>
             <p>
               Once the game has initiated, you are presented with a large playing field.
-              When this playing field was generated, it contained an eye pleasing gradient,
-              however these tiles have been scrambled!
+              When this playing field was generated, it contained an eye pleasing gradient like below,
+              however on your board these tiles have been scrambled!
             </p>
+            <play-field [ownBoard]="false"
+                        [player]="solution"
+                        [gameOver]="false">
+            </play-field>
             <p>
               It's your task to rearrange the scrambled tiles and make the playing field great again!
               Click a swap-able tile, the ones with a black dot are <strong>not</strong> swap-able, and click
@@ -125,13 +129,6 @@
               </button> once you are prepared.
               The game can be initiated by any player as soon as everybody is ready.
             </p>
-          </div>
-          <div class="col-12 text-center m-t-3">
-            <!--<button class="btn btn-lg btn-outline-primary"
-                    [ngClass]="{'ready': isReady()}"
-                    (click)="toggleSelfReady()">
-              <span>Ready</span>
-            </button>-->
           </div>
 
           <div class="col-12 text-center m-t-3 m-b-1">

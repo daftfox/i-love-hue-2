@@ -17,14 +17,14 @@ class Game {
         this.chatMessages = [];
         this.name = name || 'Game' + helper_class_1.Helper.rng(0, 99);
         this.mode = Game.GAMEMODE[mode];
-        this.im = new immutable_mask_class_1.ImmutableMask(this.mode.rows, this.mode.columns, difficulty);
         this.websocketService = websocketService;
+        this.difficulty = difficulty;
         this.map = this.generateMap();
         this.state = 'ready';
         this.id = helper_class_1.Helper.generateId();
     }
     generateMap() {
-        return new map_class_1.Map(this.mode.rows, this.mode.columns, ...Game.COLORSETS[helper_class_1.Helper.rng(0, Game.COLORSETS.length - 1)]);
+        return new map_class_1.Map(this.mode.rows, this.mode.columns, new immutable_mask_class_1.ImmutableMask(this.mode.rows, this.mode.columns, this.difficulty), ...Game.COLORSETS[helper_class_1.Helper.rng(0, Game.COLORSETS.length - 1)]);
     }
     newRound(callback) {
         this.map = this.generateMap();
@@ -33,16 +33,13 @@ class Game {
     }
     initiate(callback) {
         this.state = 'initiated';
-        this.startClock();
+        //this.startClock();
         this.generateAndSetTiles();
         callback(this);
     }
     generateAndSetTiles() {
-        let tiles = this.im.maskTiles(this.map.tiles);
-        // this is the solution, keep it safe you hear!
-        this.map.setSolution(tiles);
         for (let client of this.clients) {
-            client.setTiles(this.im.scrambleTiles(tiles));
+            client.setTiles(this.map.getScrambledTiles());
         }
     }
     startClock() {

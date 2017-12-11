@@ -92,6 +92,17 @@ h3 {
   }
 }
 
+.game-lobby {
+  margin-top: 15vh;
+
+  play-field {
+    display: block;
+    width:   11em;
+    height:  15em;
+    margin:  0 auto;
+  }
+}
+
 .play-screen {
   height: 100%;
 
@@ -102,13 +113,13 @@ h3 {
     opacity:             0;
     transition-duration: 2s;
     text-align:          center;
-    padding-top:         30%;
+    padding-top:         40%;
     pointer-events:      none;
 
     .clock {
       span {
         font-size:   90px;
-        margin-left: -25px;
+        margin-left: -5px;
 
         &.hurry {
           color:       $peach;

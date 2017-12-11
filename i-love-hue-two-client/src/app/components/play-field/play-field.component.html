@@ -1,16 +1,23 @@
 <div class="wrapper">
-  <div class="row">
-    <div class="field" *ngIf="player">
-      <board [gameOver]="gameOver" [ownBoard]="ownBoard" [tiles]="player.tiles" (boardUpdated)="tileSwap($event)"></board>
+  <div class="row"
+       [ngClass]="{'full-size': !player.name}">
+    <div class="field"
+         *ngIf="player">
+      <board [gameOver]="gameOver"
+             [ownBoard]="ownBoard"
+             [tiles]="player.tiles"
+             (boardUpdated)="tileSwap($event)">
+      </board>
     </div>
   </div>
-  <div class="row info no-gutters">
-    <div class="player-score col-4">
+  <div class="row info no-gutters"
+       *ngIf="player.name">
+    <div class="col-4">
       <div>Score: {{player.score}}</div>
       <div>Swaps: {{player.tileSwaps}}</div>
     </div>
-    <div class="player-name col-8">
-      <span>Player: {{player.name}}</span>
+    <div class="col-8">
+      <div>Player: {{player.name}}</div>
     </div>
   </div>
 </div>
