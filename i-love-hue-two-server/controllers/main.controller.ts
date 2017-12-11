@@ -149,7 +149,7 @@ export class MainController {
     }
 
     private playerTileSwap(message: any): void {
-        let game = <Game>this.getGame(message.game_id);
+        let game = <Game> this.getGame(message.game_id);
 
         // update timeout so game does not get removed for another ten minutes
         clearTimeout(game.timeout);
@@ -213,8 +213,6 @@ export class MainController {
         let index = this.games.findIndex((g) => id === g.id);
         if (index) this.games.splice(index, 1);
         this.websocketService.removeGame(id);
-
-        console.log(id);
 
         console.log(`Removed game with id ${id}.`);
     }

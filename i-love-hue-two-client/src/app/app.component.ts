@@ -227,10 +227,6 @@ export class AppComponent {
     this.playerUpdate();
   }
 
-  setJoinGame(id?: string): void {
-    this.selectedGame = id;
-  }
-
   playerUpdate(): void {
     this.sendMessage(
       {
@@ -309,6 +305,7 @@ export class AppComponent {
   }
 
   tileSwap(player: Client, tileSwap: any): void {
+    console.log('swap!');
     if (this.celebrations) {
       // the game is over, no more swaps!
       return;
@@ -332,6 +329,10 @@ export class AppComponent {
     // reassign tiles. changes object reference, thus triggering the board's onChange() method
     player.setTiles(tilesCopy);
     player.tileSwaps++;
+
+    console.log(this.self.id);
+    console.log(player.id);
+
     if (this.self.id === player.id) {
       this.sendMessage(
         {
@@ -339,7 +340,7 @@ export class AppComponent {
           client_id: this.self.id,
           tile_swap: tileSwap,
           tile_swaps: player.tileSwaps,
-          game_name: this.gameId
+          game_id: this.gameId
         }
       );
     }
