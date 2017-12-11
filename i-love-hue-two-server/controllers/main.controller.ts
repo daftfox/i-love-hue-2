@@ -21,6 +21,9 @@ export class MainController {
                     case 'player_join_game':
                         this.playerJoinGame(message);
                         break;
+                    case 'player_forfeit':
+                        this.playerForfeit(message);
+                        break;
                     case 'player_ready':
                     case 'player_not_ready':
                         this.playerReady(message);
@@ -47,10 +50,10 @@ export class MainController {
     }
 
     private playerReady(message: any): void {
-        let game = this.getGame(message.game_id);
+        let game = <Game> this.getGame(message.game_id);
         if (game) {
-            let clients = game.getAllClients();
             let client = game.getClient(message.client_id);
+            let clients = game.getAllClients();
             client.toggleReady();
             for (let client of clients) {
                 this.websocketService.sendMessageToClient(
@@ -66,24 +69,25 @@ export class MainController {
 
     private playerJoinGame(message: any): void {
         let game = <Game>this.getGame(message.game_id);
-        console.log(game);
         if (game) {
             game.addClient(message.client_id, message.client_name);
             let clients = game.getAllClients();
             let newPlayer = game.getClient(message.client_id);
+
             for (let client of clients) {
 
                 // send new player a list of all players already in the lobby
                 this.websocketService.sendMessageToClient(
                     newPlayer.id,
                     {
-                        "event":        "player_joined",
-                        "client_id":    client.id,
-                        "client_name":  client.name,
-                        "client_ready": client.isReady,
-                        "client_tiles": client.tiles,
-                        "game_name":    game.name,
-                        "game_id":      game.id
+                        "event":         "player_joined",
+                        "client_id":     client.id,
+                        "client_name":   client.name,
+                        "client_ready":  client.isReady,
+                        "client_tiles":  client.tiles,
+                        "chat_messages": game.chatMessages,
+                        "game_name":     game.name,
+                        "game_id":       game.id
                     }
                 );
 
@@ -190,30 +194,57 @@ export class MainController {
     }
 
     private playerForfeit(message: any): void {
-        //this.game.removeClient(message.client_id);
+        let game = <Game> this.getGame(message.game_id);
+        game.removeClient(message.client_id);
         this.websocketService.broadcastMessage(
             {
-                "event":     "player_forfeit",
-                "client_id": message.client_id
+                "event":       "player_forfeit",
+                "client_id":   message.client_id,
+                "client_name": message.client_name
             }
         );
+
+        if (game.clients.length === 0) {
+            this.removeGame(game.id);
+        }
     }
 
     private removeGame(id: string): void {
-        console.log(`Removed game with id ${id} due to inactivity.`);
-        let index = this.games.findIndex((game) => id === game.id);
-        if (index) this.games = this.games.splice(index, 1);
+        let index = this.games.findIndex((g) => id === g.id);
+        if (index) this.games.splice(index, 1);
+        this.websocketService.removeGame(id);
+
+        console.log(id);
+
+        console.log(`Removed game with id ${id}.`);
+    }
+
+    private endGame(id: string): void {
+        this.notifyEndGame(id);
+        this.removeGame(id);
+    }
+
+    private notifyEndGame(id: string): void {
+        let game = <Game> this.getGame(id);
+
+        // broadcast event to those that are still connected
+        this.websocketService.broadcastMessageInGame(
+            {
+                event: 'game_end'
+            },
+            game
+        );
     }
 
     private updateTimeout(id: string): any {
         let timeoutHandler = (id: string) => {
-            this.removeGame.bind(this);
-            return this.removeGame(id);
+            this.endGame.bind(this);
+            return this.endGame(id);
         };
 
         return setTimeout(() => {
             return timeoutHandler(id);
-        }, 60000);
+        }, 600000); // 10 minutes
     }
 
     private startNewGame(message: any): void {
@@ -221,12 +252,13 @@ export class MainController {
         let newGame = new Game(message.game.mode, message.game.name, this.websocketService, message.game.difficulty);
         this.games.push(newGame);
         this.websocketService.games.push(newGame);
-        console.log(`Game ${newGame.name} started!`);
+
+        console.log(`Game ${newGame.name} with id ${newGame.id} started!`);
 
         // add this client to the game
         newGame.addClient(message.client_id, message.client_name);
 
-        // set timeout to remove game after ten minutes of inactivity
+        // set timeout to remove game after ten minutes of inactivity (no tile-swaps)
         newGame.timeout = this.updateTimeout(newGame.id);
 
         this.websocketService.broadcastMessageInGame (
@@ -238,17 +270,6 @@ export class MainController {
                 "game_id":     newGame.id
             },
             newGame
-        );
-        let games = this.games.map((game) => {
-            return {name: game.name, id: game.id};
-        });
-        this.websocketService.broadcastMessage (
-            {
-                "event":       "new_game_launched",
-                "client_id":   message.client_id,
-                "client_name": message.client_name,
-                "games":       games
-            }
         );
     }
 }

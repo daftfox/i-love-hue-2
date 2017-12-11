@@ -20,7 +20,8 @@ export class Game {
     name:             string;
     map:              Map;
     mode:             GameMode;
-    clients:          Client[] = [];
+    clients:          Client[]   = [];
+    chatMessages:     Array<any> = [];
     state:            string;
     time:             number;
     clock:            any;
@@ -122,5 +123,10 @@ export class Game {
         let client = this.websocketService.getClient(clientId);
         client.setName(clientName);
         this.clients.push(client);
+    }
+
+    public removeClient(id: string): void {
+        let index = this.clients.findIndex((client) => client.id === id);
+        this.clients.splice(index, 1);
     }
 }

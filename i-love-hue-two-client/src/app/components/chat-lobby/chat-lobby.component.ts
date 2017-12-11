@@ -3,10 +3,10 @@ import { Client } from '../../../../../i-love-hue-two-server/models/client.class
 import { trigger,style,transition,animate,keyframes,query,stagger } from '@angular/animations';
 
 @Component({
-  selector: 'server-lobby',
-  templateUrl: './server-lobby.component.html',
+  selector: 'chat-lobby',
+  templateUrl: './chat-lobby.component.html',
   styleUrls: [
-    './server-lobby.component.css'
+    './chat-lobby.component.css'
   ],
   animations: [
 
@@ -26,9 +26,9 @@ import { trigger,style,transition,animate,keyframes,query,stagger } from '@angul
   ]
 })
 
-export class ServerLobbyComponent {
-  @Input() globalPlayers:  Array<string>;
-  @Input() globalMessages: Array<any>;
+export class ChatLobbyComponent {
+  @Input() players:  Array<any>;
+  @Input() messages: Array<any>;
   @Input() self:           Client;
   @Output() sendMessage =  new EventEmitter();
   chatMessage:             string = '';

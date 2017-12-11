@@ -42,7 +42,10 @@ export class WebsocketService {
                             client.setName(message.client_name);
                             break;
                         case 'global_chat_message':
-                            this.sendChat(message.client_name, client.id, message.text);
+                            this.sendGlobalChat(message.client_name, client.id, message.text);
+                            break;
+                        case 'game_chat_message':
+                            this.sendChat(message.client_name, client.id, message.game_id, message.text);
                             break;
                         default:
                             observer.next(message);
@@ -53,25 +56,43 @@ export class WebsocketService {
                 ws.on('close', () => {
                     console.log(`Client ${client.name} with id: ${client.id} has closed the connection. Removing from the list.`);
                     clearInterval(updateInterval);
-                    this.removeClient(client);
+                    this.removeClient(client.id);
                 });
 
-                let games   = JSON.stringify(this.games.filter((game) => game.state !== 'initiated').map((game) => game.name));
-                let players = JSON.stringify(this.clients.map((client) => client.name));
+                let gamesJson   = JSON.stringify(this.games.filter((game) => game.state !== 'initiated').map((game) => { return {name: game.name, id: game.id}; }));
+                let players     = this.clients.filter((client) => client.name).map((client) => client.name);
+                let playersJson = JSON.stringify(players);
+
                 ws.send(
                     `{
                         "event": "connect_succesful",
                         "users_on_server": ${this.clients.length},
                         "client_id": "${client.id}",
-                        "games": ${games},
-                        "global_players": ${players}
+                        "games": ${gamesJson},
+                        "global_players": ${playersJson}
                     }`
                 );
             });
         });
     }
 
-    private sendChat(clientName: string, clientId: string, chatMessage: string): void {
+    private sendChat(clientName: string, clientId: string, game_id: string, chatMessage: string): void {
+        let game = <Game>this.getGame(game_id);
+        for (let client of game.clients) {
+            if (client.webSocket) {
+                client.webSocket.send(
+                    `{
+                        "event": "game_chat_message",
+                        "client_id": "${clientId}",
+                        "client_name": "${clientName}",
+                        "chat_message": "${chatMessage}"
+                    }`
+                );
+            }
+        }
+    }
+
+    private sendGlobalChat(clientName: string, clientId: string, chatMessage: string): void {
         for (let client of this.clients) {
             if (client.webSocket) {
                 client.webSocket.send(
@@ -87,7 +108,7 @@ export class WebsocketService {
     }
 
     private updatePlayerData(ws: WebSocket): void {
-        let games   = JSON.stringify(this.games.filter((game) => game.state !== 'initiated').map((game) => {
+        let games = JSON.stringify(this.games.filter((game) => game.state !== 'initiated').map((game) => {
             return {id: game.id, name: game.name};
         }));
         let players = JSON.stringify(this.clients.map((client) => client.name));
@@ -104,10 +125,21 @@ export class WebsocketService {
         return <Client> this.clients.find((client) => client.id === clientId);
     }
 
-    private removeClient(client: Client): void {
-        let indexOfClient = this.clients.findIndex((c) => c.id === client.id);
-        this.clients.splice(indexOfClient, 1);
+    private getGame(id: string): Game | void {
+        let game = this.games.find((game) => game.id === id);
+        if (game) {
+            return game;
+        }
+    }
 
+    public removeClient(id: string): void {
+        let index = this.clients.findIndex((c) => c.id === id);
+        this.clients.splice(index, 1);
+    }
+
+    public removeGame(id: string): void {
+        let index = this.games.findIndex((c) => c.id === id);
+        this.games.splice(index, 1);
     }
 
     public getAllClients(): Client[] {
@@ -142,7 +174,7 @@ export class WebsocketService {
                 client.webSocket.send(JSON.stringify(message));
             } catch(e) {
                 console.log(`Error ${JSON.stringify(e)} while sending message to client with id: ${client.id}. Removing ${client.id} from the list.`);
-                this.removeClient(client);
+                this.removeClient(client.id);
             }
         }
     }

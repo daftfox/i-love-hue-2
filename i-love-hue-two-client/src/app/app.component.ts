@@ -1,12 +1,13 @@
 import { Component } from '@angular/core';
 import { MessageService } from './services/message.service';
 import { Client } from '../../../i-love-hue-two-server/models/client.class';
-import { trigger, style, transition, animate } from '@angular/animations';
+import {Helper} from "../../../i-love-hue-two-server/models/helper.class";
+/* import { trigger, style, transition, animate } from '@angular/animations'; */
 
 @Component({
   selector: 'app-root',
   templateUrl: './app.component.html',
-  styleUrls: ['./app.component.css'],
+  styleUrls: ['./app.component.css']/*,
   animations: [
     trigger('swipeInOut', [
       transition(':enter', [
@@ -17,7 +18,7 @@ import { trigger, style, transition, animate } from '@angular/animations';
         animate('400ms ease-in', style({transform: 'translateX(-100%)', opacity: 0}))
       ])
     ])
-  ]
+  ]*/
 })
 
 export class AppComponent {
@@ -30,24 +31,25 @@ export class AppComponent {
   playerName = {
     value: undefined
   };
-  globalMessages:  Array<any>    = [];
-  games:           Array<any>    = [];
-  players:         Client[]      = [];
-  globalPlayers:   Client[]      = [];
-  splash:          boolean       = false;
-  connectionError: boolean       = false;
-  select:          boolean       = false;
-  lobby:           boolean       = false;
-  play:            boolean       = false;
-  messageService:  MessageService;
-  self:            Client;
-  gameName:        string;
-  gameId:          string;
-  url:             string;
-  difficulty:      number;
-  mode:            number;
-  celebrations:    string;
-  selectedGame:    string;
+  globalMessages:   Array<any>    = [];
+  messages:         Array<any>    = [];
+  games:            Array<any>    = [];
+  players:          Client[]      = [];
+  globalPlayers:    Array<any>    = [];
+  splash:           boolean       = false;
+  connectionError:  boolean       = false;
+  select:           boolean       = false;
+  lobby:            boolean       = false;
+  play:             boolean       = false;
+  messageService:   MessageService;
+  self:             Client;
+  gameName:         string;
+  gameId:           string;
+  url:              string;
+  difficulty:       number = 0;
+  mode:             number = 0;
+  celebrations:     string;
+  selectedGame:     string;
 
   constructor(){
     this.setState('splash');
@@ -99,20 +101,19 @@ export class AppComponent {
           this.setState('select');
           this.setSelf(message.client_id, playerName);
           this.games = message.games;
-          break;
-        case 'new_game_launched':
-          this.games = message.games;
+          this.globalPlayers = message.global_players.map((player) => { return {name: player}; });
           break;
         case 'player_joined':
           if (message.client_id === this.self.id) {
             this.setState('lobby');
             this.gameId   = message.game_id;
             this.gameName = message.game_name;
+            this.messages = message.chat_messages || [];
           } else {
             let newPlayer = new Client(message.client_name);
+            this.players.push(newPlayer);
             newPlayer.setTiles(message.client_tiles);
             newPlayer.isReady = message.client_ready;
-            this.players.push(newPlayer);
           }
           break;
         case 'initiate_game':
@@ -129,15 +130,29 @@ export class AppComponent {
         case 'player_tile_swap':
           this.tileSwap(this.players.find((player) => player.id === message.client_id), message.tile_swap);
           break;
+        case 'player_forfeit':
+          this.removePlayer(message);
+          break;
+        case 'game_end':
+          this.cleanup();
+          break;
         case 'player_win':
           this.endGame(message);
           break;
         case 'data_update':
-          this.games         = message.games;
-          this.globalPlayers = message.global_players;
+          Helper.updateArray(this.games, message.games);
+          let newPlayers = message.global_players.map((player) => { return {name: player}; });
+          Helper.updateArray(this.globalPlayers, newPlayers);
           break;
         case 'global_chat_message':
           this.globalMessages.unshift({
+            sender:         message.client_name,
+            client_id:      message.client_id,
+            chat_message:   message.chat_message
+          });
+          break;
+        case 'game_chat_message':
+          this.messages.unshift({
             sender:         message.client_name,
             client_id:      message.client_id,
             chat_message:   message.chat_message
@@ -156,6 +171,26 @@ export class AppComponent {
     this.players.find((player) => player.id === message.client_id).incrementScore();
   }
 
+  cleanup(): void {
+    this.setState('select');
+    this.gameId   = null;
+    this.gameName = null;
+    this.messages = [];
+  }
+
+  leaveGame(): void {
+    this.sendMessage(
+      {
+        event:       'player_forfeit',
+        client_id:   this.self.id,
+        game_id:     this.gameId,
+        client_name: this.self.name
+      }
+    );
+
+    this.cleanup();
+  }
+
   newGame(name: string, difficulty: number, mode: number): void {
     this.sendMessage(
       {
@@ -171,12 +206,29 @@ export class AppComponent {
     );
   }
 
+  private removePlayer(message: any): void {
+    let index = this.players.findIndex((player) => player.id === message.client_id);
+    let name =  this.players.find((player) => player.id === message.client_id).name;
+
+    this.messages.unshift({
+      sender:         'Server',
+      client_id:      'admin',
+      chat_message:   `Player ${name} has forfeited the game.`
+    });
+    if (message.client_id !== this.self.id) this.players.splice(index, 1);
+    else this.players = [];
+  }
+
   setSelf(clientId: string, clientName: string): void {
     this.self    = new Client(clientName);
     this.self.id = clientId;
 
     this.players.push(this.self);
     this.playerUpdate();
+  }
+
+  setJoinGame(id?: string): void {
+    this.selectedGame = id;
   }
 
   playerUpdate(): void {
@@ -234,6 +286,16 @@ export class AppComponent {
   }
 
   sendChatMessage(chatMessage): void {
+    this.sendMessage({
+      event:       'game_chat_message',
+      client_id:   this.self.id,
+      client_name: this.self.name,
+      game_id:     this.gameId,
+      text:        chatMessage          // todo: check for evil code in chat message or limit allowed characters
+    });
+  }
+
+  sendGlobalChatMessage(chatMessage): void {
     this.sendMessage({
       event:       'global_chat_message',
       client_id:   this.self.id,

@@ -3,7 +3,7 @@
 }
 
 .m-b {
-  margin-bottom: 10px;
+  margin-bottom: 2px;
 }
 
 .message-list {
@@ -46,6 +46,11 @@
 .message-list .messages div.self {
    color:        limegreen;
    border-color: limegreen;
+}
+
+.message-list .messages div.admin {
+  color:        #ff6358;
+  border-color: #ff6358;
 }
 
 .message-list .messages div div {

@@ -11,7 +11,7 @@ import { PlayFieldComponent } from './components/play-field/play-field.component
 import { MusicPlayerComponent } from './components/music-player/music-player.component';
 import { TitleHeaderComponent } from './components/header/title-header.component';
 import { ClockComponent } from './components/clock/clock.component';
-import { ServerLobbyComponent } from './components/server-lobby/server-lobby.component';
+import { ChatLobbyComponent } from './components/chat-lobby/chat-lobby.component';
 
 @NgModule({
   declarations: [
@@ -21,7 +21,7 @@ import { ServerLobbyComponent } from './components/server-lobby/server-lobby.com
     MusicPlayerComponent,
     TitleHeaderComponent,
     ClockComponent,
-    ServerLobbyComponent
+    ChatLobbyComponent
   ],
   imports: [
     BrowserModule,

@@ -7,8 +7,7 @@
            *ngIf="!play">
         <title-header></title-header>
       </div>
-      <div [@swipeInOut]
-           class="splash-screen"
+      <div class="splash-screen"
            *ngIf="splash">
         <div class="row justify-content-center">
           <div class="col-6 text-right m-t-3">
@@ -53,8 +52,7 @@
         </div>
       </div>
 
-      <div [@swipeInOut]
-           *ngIf="select"
+      <div *ngIf="select"
            class="game-select">
         <div class="row">
           <div class="col-12 text-center m-t-3">
@@ -64,39 +62,35 @@
 
           <div class="col-6 text-center m-t-3">
             <div>Game difficulty: </div>
-            <input class="" type="radio" value="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
-            <input class="" type="radio" value="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
-            <input class="" type="radio" value="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
+            <input class="" type="radio" [value]="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
+            <input class="" type="radio" [value]="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
+            <input class="" type="radio" [value]="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
           </div>
 
           <div class="col-6 text-center m-t-3">
             <div>Board size: </div>
-            <input class="" type="radio" value="0" name="mode" [(ngModel)]="mode" /> 8x8
-            <input class="" type="radio" value="1" name="mode" [(ngModel)]="mode" /> 10x10
-            <input class="" type="radio" value="2" name="mode" [(ngModel)]="mode" /> 15x15
+            <input class="" type="radio" [value]="0" name="mode" [(ngModel)]="mode" /> 8x8
+            <input class="" type="radio" [value]="1" name="mode" [(ngModel)]="mode" /> 10x10
+            <input class="" type="radio" [value]="2" name="mode" [(ngModel)]="mode" /> 15x15
           </div>
 
           <div class="col-12 text-center m-t-3">
             <button class="btn btn-lg btn-outline-primary"
-                    [ngClass]="{'disabled': !difficulty || !mode}"
-                    (click)="newGame(gameName.value, difficulty, mode)"
-                    [disabled]="!difficulty">
+                    (click)="newGame(gameName.value, difficulty, mode)">
               <span>New game</span>
             </button>
           </div>
 
           <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
-            <span>Game: <small>(select one to join)</small></span>
+            <span>Available games: <small></small></span>
             <select [(ngModel)]="selectedGame">
-              <option value="{{game.id}}"
-                      name="selectedServer"
-                      [selected]="last"
-                      *ngFor="let game of games; let last = last">
+              <option [value]="game.id"
+                      *ngFor="let game of games">
                 {{game.name}}
               </option>
             </select>
           </div>
-          <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
+          <div class="col-12 text-center m-t-3 m-b-1" *ngIf="games.length > 0">
             <button class="btn btn-lg btn-outline-primary"
                     [ngClass]="{'disabled': !selectedGame}"
                     [disabled]="!selectedGame"
@@ -107,30 +101,57 @@
         </div>
       </div>
 
-      <div [@swipeInOut]
-           *ngIf="lobby"
+      <div *ngIf="lobby"
            class="lobby">
         <div class="row">
           <div class="col-12 text-center m-t-3">
-            <button class="btn btn-lg btn-outline-primary"
+            <h2>Get ready for {{gameName}}!</h2>
+            <p>
+              Once the game has initiated, you are presented with a large playing field.
+              When this playing field was generated, it contained an eye pleasing gradient,
+              however these tiles have been scrambled!
+            </p>
+            <p>
+              It's your task to rearrange the scrambled tiles and make the playing field great again!
+              Click a swap-able tile, the ones with a black dot are <strong>not</strong> swap-able, and click
+              the other tile you want to swap it with.
+            </p>
+            <p>
+              Click
+              <button class="btn btn-sm btn-outline-primary"
+                            [ngClass]="{'ready': isReady()}"
+                            (click)="toggleSelfReady()">
+                <span>Ready</span>
+              </button> once you are prepared.
+              The game can be initiated by any player as soon as everybody is ready.
+            </p>
+          </div>
+          <div class="col-12 text-center m-t-3">
+            <!--<button class="btn btn-lg btn-outline-primary"
                     [ngClass]="{'ready': isReady()}"
                     (click)="toggleSelfReady()">
               <span>Ready</span>
-            </button>
+            </button>-->
           </div>
 
-          <div class="col-12 text-center m-t-3">
+          <div class="col-12 text-center m-t-3 m-b-1">
             <button class="btn btn-lg btn-outline-primary"
                     [ngClass]="{'disabled': !canStartGame()}"
                     (click)="canStartGame() && startGame()"
                     [disabled]="!canStartGame()">
               <span>Start game</span>
             </button>
+            <button class="btn btn-lg btn-outline-primary"
+                    [ngClass]="{'disabled': canStartGame()}"
+                    (click)="leaveGame()"
+                    [disabled]="canStartGame()">
+              <span>Leave game</span>
+            </button>
           </div>
         </div>
       </div>
 
-      <div [@swipeInOut]
+      <div
            *ngIf="play">
         <div class="row play-screen no-gutters justify-content-center">
           <div class="col-12 col-md-10 col-lg-8">
@@ -150,32 +171,24 @@
     </div>
 
     <div id="lobby"
-         class="col-3 hidden-lg-down">
-      <div [@swipeInOut]
-           *ngIf="select"
+         class="col-3 d-none d-lg-block">
+      <div *ngIf="select"
            class="row server-lobby no-gutters align-items-center">
-        <server-lobby [globalMessages]="globalMessages"
-                      [globalPlayers]="globalPlayers"
-                      [self]="self"
-                      (sendMessage)="sendChatMessage($event)">
-        </server-lobby>
+        <chat-lobby [messages]="globalMessages"
+                    [players]="globalPlayers"
+                    [self]="self"
+                    (sendMessage)="sendGlobalChatMessage($event)">
+        </chat-lobby>
       </div>
-      <div [@swipeInOut]
-           *ngIf="lobby"
+      <div *ngIf="lobby"
            class="row game-lobby no-gutters align-items-center">
-        <div class="col-12"
-             *ngFor="let player of players">
-          <div class="col-12 opponent-info"
-               *ngIf="player.id !== self.id">
-            <div class="col-8 opponent">
-              <span [ngClass]="{'green': player.isReady, 'peach': !player.isReady}">{{player.name}}</span>
-              <span> - {{player.score}}</span>
-            </div>
-          </div>
-        </div>
+        <chat-lobby [messages]="messages"
+                    [players]="players"
+                    [self]="self"
+                    (sendMessage)="sendChatMessage($event)">
+        </chat-lobby>
       </div>
-      <div [@swipeInOut]
-           *ngIf="play">
+      <div *ngIf="play">
         <div *ngFor="let player of players" class="col-lg-10 col-xl-8 mini-view">
           <play-field [ownBoard]="false"
                       [gameOver]="gameOver()"

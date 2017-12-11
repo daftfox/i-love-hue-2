@@ -1,0 +1,59 @@
+<div class="col-12">
+  <div class="row player-list no-gutters">
+    <div class="col-12">
+      <div class="col-12">
+        <div class="row no-gutters">
+          <div class="col-6">
+            <small>Name</small>
+          </div>
+          <div class="col-3">
+            <small>Score</small>
+          </div>
+          <div class="col-3">
+            <small>Status</small>
+          </div>
+        </div>
+      </div>
+      <div class="col-12 player-names">
+        <div *ngFor="let player of players"
+             class="row no-gutters">
+          <div class="col-6">{{player.name}}</div>
+          <div class="col-3"
+               *ngIf="player.score >= 0">
+            {{player.score}}
+          </div>
+          <div class="col-3">
+            <span class="green"
+                  *ngIf="player.isReady">
+              Ready
+            </span>
+          </div>
+        </div>
+      </div>
+      <small>Online now: {{players.length}}</small>
+    </div>
+  </div>
+  <div class="row message-list no-gutters">
+    <div class="col-12 messages"
+         [@listAnimation]="messages.length">
+      <div *ngFor="let message of messages; let i = index"
+           class="col-12 m-b"
+           [ngClass]="{'self': message.client_id === self.id, 'admin': message.client_id === 'admin'}">
+        <div class="col-12"
+             *ngIf="i === 0 || (messages[i - 1] && messages[i - 1].client_id !== message.client_id)">
+          {{message.sender}}:
+        </div>
+        <p>
+          {{message.chat_message}}
+        </p>
+      </div>
+    </div>
+    <div class="row send-message no-gutters">
+      <div class="col-12">
+        <input type="text"
+               (keyup.enter)="send()"
+               [(ngModel)]="chatMessage" />
+      </div>
+    </div>
+  </div>
+</div>

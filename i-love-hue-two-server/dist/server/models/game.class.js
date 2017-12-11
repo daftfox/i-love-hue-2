@@ -14,6 +14,7 @@ exports.GameMode = GameMode;
 class Game {
     constructor(mode, name, websocketService, difficulty) {
         this.clients = [];
+        this.chatMessages = [];
         this.name = name || 'Game' + helper_class_1.Helper.rng(0, 99);
         this.mode = Game.GAMEMODE[mode];
         this.im = new immutable_mask_class_1.ImmutableMask(this.mode.rows, this.mode.columns, difficulty);
@@ -68,6 +69,10 @@ class Game {
         let client = this.websocketService.getClient(clientId);
         client.setName(clientName);
         this.clients.push(client);
+    }
+    removeClient(id) {
+        let index = this.clients.findIndex((client) => client.id === id);
+        this.clients.splice(index, 1);
     }
 }
 Game.GAMEMODE = [
