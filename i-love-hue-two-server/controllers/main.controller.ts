@@ -65,7 +65,8 @@ export class MainController {
     }
 
     private playerJoinGame(message: any): void {
-        let game = this.getGame(message.game_id);
+        let game = <Game>this.getGame(message.game_id);
+        console.log(game);
         if (game) {
             game.addClient(message.client_id, message.client_name);
             let clients = game.getAllClients();
@@ -81,7 +82,8 @@ export class MainController {
                         "client_name":  client.name,
                         "client_ready": client.isReady,
                         "client_tiles": client.tiles,
-                        "game_name":    message.game_name
+                        "game_name":    game.name,
+                        "game_id":      game.id
                     }
                 );
 
@@ -94,7 +96,8 @@ export class MainController {
                         "client_name":  newPlayer.name,
                         "client_ready": false,
                         "client_tiles": newPlayer.tiles,
-                        "game_name":    message.game_name
+                        "game_name":    game.name,
+                        "game_id":      game.id
                     }
                 );
             }
@@ -111,6 +114,7 @@ export class MainController {
                 this.websocketService.broadcastMessageInGame (
                     {
                         "event":   "initiate_game",
+                        "game_id": "game.id",
                         "players": clients
                     },
                     game
@@ -230,11 +234,14 @@ export class MainController {
                 "event":       "player_joined",
                 "client_id":   message.client_id,
                 "client_name": message.client_name,
-                "game_name":   newGame.name
+                "game_name":   newGame.name,
+                "game_id":     newGame.id
             },
             newGame
         );
-        let games = this.games.map((game) => game.name);
+        let games = this.games.map((game) => {
+            return {name: game.name, id: game.id};
+        });
         this.websocketService.broadcastMessage (
             {
                 "event":       "new_game_launched",

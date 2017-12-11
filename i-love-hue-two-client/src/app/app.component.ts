@@ -106,7 +106,7 @@ export class AppComponent {
         case 'player_joined':
           if (message.client_id === this.self.id) {
             this.setState('lobby');
-            this.gameId = message.game_id;
+            this.gameId   = message.game_id;
             this.gameName = message.game_name;
           } else {
             let newPlayer = new Client(message.client_name);
