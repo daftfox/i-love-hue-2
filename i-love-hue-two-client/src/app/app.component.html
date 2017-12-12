@@ -14,11 +14,11 @@
             <label for="url">Server url: <small>(optional)</small></label>
           </div>
           <div class="col-6 m-t-3">
-            <input id="url" type="text" [(ngModel)]="customUrl.value" />
+            <input id="url" type="text" [(ngModel)]="customUrl" />
           </div>
 
           <div *ngIf="connectionError"
-               class="col-12">
+               class="col-12 text-center">
             <p class="peach">There was an error connecting to the supplied url.</p>
             <p><small>Keep in mind: the server url should look like this: ws://192.168.1.1:8999</small></p>
           </div>
@@ -27,14 +27,14 @@
             <label for="player-name">Player name: <small>(required)</small></label>
           </div>
           <div class="col-6 m-t-3">
-            <input id="player-name" type="text" [(ngModel)]="playerName.value" />
+            <input id="player-name" type="text" [(ngModel)]="playerName" />
           </div>
 
           <div class="col-12 text-center m-t-3">
             <button class="btn btn-lg btn-outline-primary"
-                    [ngClass]="{'disabled': !playerName.value}"
-                    (click)="connectToGame(playerName.value, customUrl.value)"
-                    [disabled]="!playerName.value">
+                    [ngClass]="{'disabled': !playerName}"
+                    (click)="connectToGame(playerName, customUrl)"
+                    [disabled]="!playerName">
               <span>Connect</span>
             </button>
           </div>
@@ -161,7 +161,7 @@
             <play-field [ownBoard]="true"
                         [player]="self"
                         [gameOver]="gameOver()"
-                        (boardUpdated)="tileSwap(self, $event)"></play-field>
+                        (boardUpdated)="tileSwap(self.id, $event)"></play-field>
           </div>
         </div>
       </div>
