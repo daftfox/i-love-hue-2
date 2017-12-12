@@ -1,7 +1,7 @@
-import { Component } from '@angular/core';
+import { Component }      from '@angular/core';
 import { MessageService } from './services/message.service';
-import { Client } from '../../../i-love-hue-two-server/models/client.class';
-import { Helper } from '../../../i-love-hue-two-server/models/helper.class';
+import { Client }         from '../../../i-love-hue-two-server/models/client.class';
+import { Helper }         from '../../../i-love-hue-two-server/models/helper.class';
 /* import { trigger, style, transition, animate } from '@angular/animations'; */
 
 @Component({
@@ -39,6 +39,8 @@ export class AppComponent {
   select:           boolean       = false;
   lobby:            boolean       = false;
   play:             boolean       = false;
+  difficulty:       number        = 0;
+  mode:             number        = 0;
   messageService:   MessageService;
   self:             Client;
   gameName:         string;
@@ -46,46 +48,12 @@ export class AppComponent {
   playerName:       string;
   gameId:           string;
   url:              string;
-  difficulty:       number = 0;
-  mode:             number = 0;
   celebrations:     string;
   selectedGame:     string;
   solution:         any = {tiles: null};
 
-  constructor(){
+  constructor() {
     this.setState('splash');
-  }
-
-  setState(state): void {
-    this.splash = false;
-    this.select = false;
-    this.lobby  = false;
-    this.play   = false;
-
-    switch(state) {
-      case 'splash':
-        this.splash = true;
-        break;
-      case 'select':
-        this.select = true;
-        break;
-      case 'lobby':
-        this.lobby = true;
-        break;
-      case 'play':
-        this.play = true;
-        break;
-    }
-  }
-
-  startClock(c) {
-    this.countdown = '';
-    this.startTime = c;
-  }
-
-  setCountdown(c) {
-    this.startTime = '';
-    this.countdown = c;
   }
 
   connectToGame() {
@@ -95,7 +63,8 @@ export class AppComponent {
     this.messageService = new MessageService(this.url);
 
     this.messageService.messages.subscribe((message) => {
-      console.log(`Event received: `, message);
+      // todo: only log when in dev mode
+      // console.log(`Event received: `, message);
 
       switch (message.event) {
         case 'connect_succesful':
@@ -117,10 +86,8 @@ export class AppComponent {
         case 'player_forfeit':
           this.playerForfeit(message);
           break;
-        case 'game_end':
-          this.gameEnd();
-          break;
         case 'player_win':
+        case 'game_end':
           this.endGame(message);
           break;
         case 'data_update':
@@ -139,7 +106,7 @@ export class AppComponent {
 
   // Client succesfully connected to server
   // Set correct state and own Client object
-  private connectSuccesful(message: any): void{
+  private connectSuccesful(message: any): void {
     this.setState('select');
     this.setSelf(message.client_id, this.playerName);
 
@@ -150,7 +117,7 @@ export class AppComponent {
   // The client or an opponent has joined the game
   // Set correct state and (if applicable) add opponent to list of players in this game
   // Set the game's solution so we can display it as an example on the game lobby page
-  private playerJoined(message: any): void{
+  private playerJoined(message: any): void {
     if (message.client_id === this.self.id) {
       this.setState('lobby');
 
@@ -243,18 +210,24 @@ export class AppComponent {
     else this.players = [];
   }
 
-  // The game has ended
-  // Set the correct state and clean up variables
-  private gameEnd(): void {
-    this.setState('select');
-    this.gameId   = null;
-    this.gameName = null;
-    this.messages = [];
+  // The game has ended or a player has won
+  // Either way display the win/lose message
+  endGame(message: any): void {
+    if (message.event === 'game_end') {
+      this.resetToServerLobby();
+    } else {
+      // A player has won, increment the score
+      this.getPlayer(message.client_id).incrementScore();
+    }
+
+    // Display win/lose message and countdown timer
+    this.setCountdown('00:15');
+    this.celebrations = (message.client_id && message.client_id === this.self.id ? 'win' : 'lose');
   }
 
   // The server has sent us a new update of available, global, data
   // Update global games and connected players
-  private dataUpdate(message: any): void{
+  private dataUpdate(message: any): void {
     Helper.updateArray(this.games, message.games);
     let newPlayers = message.global_players.map((player) => { return {name: player}; });
     Helper.updateArray(this.globalPlayers, newPlayers);
@@ -278,19 +251,45 @@ export class AppComponent {
     }
   }
 
-  endGame(message: any): void {
-    console.log(this.self.id);
-    console.log(message.client_id);
-    this.celebrations = (message.client_id === this.self.id ? 'win' : 'lose');
-    console.log(this.celebrations);
-    this.setCountdown('00:15');
-    this.players.find((player) => player.id === message.client_id).incrementScore();
+  // Set the state and thusly the screen to display
+  // todo: refactor and add/remove screen component
+  private setState(state): void {
+    this.splash = false;
+    this.select = false;
+    this.lobby  = false;
+    this.play   = false;
+
+    switch(state) {
+      case 'splash':
+        this.splash = true;
+        break;
+      case 'select':
+        this.select = true;
+        break;
+      case 'lobby':
+        this.lobby = true;
+        break;
+      case 'play':
+        this.play = true;
+        break;
+    }
   }
 
-  private getPlayer(id: string): Client{
+  // Navigates player back to server lobby screen
+  // Set correct state and clean up variables
+  private resetToServerLobby(): void {
+    this.setState('select');
+    this.gameId   = null;
+    this.gameName = null;
+    this.messages = [];
+  }
+
+  // Get client from the current list of players by id
+  private getPlayer(id: string): Client {
     return this.players.find((player) => player.id === id)
   }
 
+  // The player clicks the 'Leave game' button
   leaveGame(): void {
     this.sendMessage(
       {
@@ -301,25 +300,27 @@ export class AppComponent {
       }
     );
 
-    this.gameEnd();
+    this.resetToServerLobby();
   }
 
+  // The player clicks the 'New game' button
   newGame(name: string, difficulty: number, mode: number): void {
     this.sendMessage(
       {
-        event: 'start_new_game',
-        client_id: this.self.id,
+        event:       'start_new_game',
+        client_id:   this.self.id,
         client_name: this.self.name,
         game: {
-          name: name,
-          mode: mode,
+          name:       name,
+          mode:       mode,
           difficulty: difficulty
         }
       }
     );
   }
 
-  setSelf(clientId: string, clientName: string): void {
+  // Set own player object with id generated by server
+  private setSelf(clientId: string, clientName: string): void {
     this.self    = new Client(clientName);
     this.self.id = clientId;
 
@@ -327,24 +328,27 @@ export class AppComponent {
     this.playerUpdate();
   }
 
-  playerUpdate(): void {
+  // Notify the server of an update of the player info
+  private playerUpdate(): void {
     this.sendMessage(
       {
-        event: "player_update",
-        client_id: this.self.id,
+        event:       "player_update",
+        client_id:   this.self.id,
         client_name: this.self.name
       }
     );
   }
 
-  setTiles(players: Client[]): void {
+  // Set tiles for each player to the values supplied in the input
+  private setTiles(players: Client[]): void {
     for (let player of players) {
-      let p = this.players.find((p) => p.id === player.id);
+      let p = this.getPlayer(player.id);
       p.setTiles(player.tiles);
       p.tileSwaps = 0;
     }
   }
 
+  // Toggle player ready state
   toggleSelfReady(): void {
     this.self.toggleReady();
     this.sendMessage(
@@ -356,11 +360,7 @@ export class AppComponent {
     );
   }
 
-  /*togglePlayerReady(id: string): void {
-    let player = <Client> this.players.find((player) => player.id === id);
-    player.toggleReady();
-  }*/
-
+  // The player initiates the current game
   startGame(): void {
     this.sendMessage(
       {
@@ -371,6 +371,7 @@ export class AppComponent {
     );
   }
 
+  // The player joins a game
   joinGame() : void {
     this.sendMessage(
       {
@@ -382,6 +383,7 @@ export class AppComponent {
     );
   }
 
+  // The player sends a chat message
   sendChatMessage(chatMessage): void {
     this.sendMessage({
       event:       'game_chat_message',
@@ -392,6 +394,7 @@ export class AppComponent {
     });
   }
 
+  // The player sends a global chat message
   sendGlobalChatMessage(chatMessage): void {
     this.sendMessage({
       event:       'global_chat_message',
@@ -401,21 +404,34 @@ export class AppComponent {
     });
   }
 
+  // Shorthand function for sending messages using the messageService
   private sendMessage(message: any): void {
     this.messageService.messages.next(message);
   }
 
+  // Validator function for deciding whether or not the game can be initiated
   canStartGame(): boolean {
+    // Are there players in the current list that are not ready yet?
     let playerNotReady = this.players.find((player) => !player.isReady);
     return !(this.players.length !== 0 && typeof playerNotReady != typeof undefined);
   }
 
-  isReady(): boolean {
-    return this.self.isReady;
-  }
-
+  // Validation function returning true when the current round has finished
   gameOver(): boolean {
     if (this.celebrations) return true;
     else return false;
+  }
+
+  // Start the clock
+  // todo: start and display the clock when playing a game
+  private startClock(st: string): void {
+    this.countdown = '';
+    this.startTime = st;
+  }
+
+  // Set the countdown for the timer
+  private setCountdown(c: string): void {
+    this.startTime = '';
+    this.countdown = c;
   }
 }

@@ -9,8 +9,8 @@ import {Component, EventEmitter, Input, OnChanges, OnInit, Output} from '@angula
 })
 
 export class ClockComponent implements OnInit, OnChanges {
-  @Input() countdown: string;
-  @Input() startTime: string;
+  @Input()  countdown: string;
+  @Input()  startTime: string;
   @Output() countdownDone = new EventEmitter();
 
   time: string;
@@ -53,10 +53,11 @@ export class ClockComponent implements OnInit, OnChanges {
   }
 
   private resetTime(): void {
-    this.hurry = false;
-    this.pulse = false;
+    this.hurry   = false;
+    this.pulse   = false;
     this.minutes = 0;
     this.seconds = 0;
+
     this.updateTime();
   }
 

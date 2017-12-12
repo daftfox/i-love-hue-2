@@ -2,7 +2,7 @@ import {
   Component, OnInit, OnChanges, ViewChild, ElementRef, Input, Output, EventEmitter
 } from '@angular/core';
 
-import * as d3 from 'd3';
+import * as d3  from 'd3';
 import { Tile } from '../../../../../i-love-hue-two-server/models/tile.class';
 
 @Component({
@@ -14,9 +14,9 @@ import { Tile } from '../../../../../i-love-hue-two-server/models/tile.class';
 })
 
 export class BoardComponent implements OnInit, OnChanges {
-  @Input() tiles: Tile[];
-  @Input() ownBoard: boolean;
-  @Input() gameOver: boolean;
+  @Input()  tiles:    Tile[];
+  @Input()  ownBoard: boolean;
+  @Input()  gameOver: boolean;
   @Output() boardUpdated = new EventEmitter();
   @ViewChild('board') private boardContainer: ElementRef;
 

@@ -8,9 +8,9 @@ import { Client } from '../../../../../i-love-hue-two-server/models/client.class
 })
 
 export class PlayFieldComponent {
-  @Input() player: Client;
-  @Input() ownBoard: boolean;
-  @Input() gameOver: boolean;
+  @Input()  player:   Client;
+  @Input()  ownBoard: boolean;
+  @Input()  gameOver: boolean;
   @Output() boardUpdated = new EventEmitter();
 
   tileSwap(tileSwap: any) {

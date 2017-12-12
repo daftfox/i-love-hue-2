@@ -1,5 +1,5 @@
 import { Component } from '@angular/core';
-import { Helper } from '../../../../../i-love-hue-two-server/models/helper.class';
+import { Helper }    from '../../../../../i-love-hue-two-server/models/helper.class';
 
 @Component({
   selector: 'music-player',

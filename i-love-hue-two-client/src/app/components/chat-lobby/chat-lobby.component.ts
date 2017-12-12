@@ -1,6 +1,8 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
 import { Client } from '../../../../../i-love-hue-two-server/models/client.class';
-import { trigger,style,transition,animate,keyframes,query,stagger } from '@angular/animations';
+import { Component, EventEmitter, Input, Output }
+  from '@angular/core';
+import { trigger,style,transition,animate,keyframes,query,stagger }
+  from '@angular/animations';
 
 @Component({
   selector: 'chat-lobby',
@@ -9,12 +11,9 @@ import { trigger,style,transition,animate,keyframes,query,stagger } from '@angul
     './chat-lobby.component.css'
   ],
   animations: [
-
     trigger('listAnimation', [
       transition('* => *', [
-
         query(':enter', style({ opacity: 0 }), {optional: true}),
-
         query(':enter', stagger('200ms', [
           animate('.5s ease-in', keyframes([
             style({opacity: 0,  transform: 'translateY(-75%)',  offset: 0}),
@@ -27,11 +26,12 @@ import { trigger,style,transition,animate,keyframes,query,stagger } from '@angul
 })
 
 export class ChatLobbyComponent {
-  @Input() players:  Array<any>;
-  @Input() messages: Array<any>;
-  @Input() self:           Client;
+  @Input()  players:  Array<any>;
+  @Input()  messages: Array<any>;
+  @Input()  self:     Client;
   @Output() sendMessage =  new EventEmitter();
-  chatMessage:             string = '';
+
+  chatMessage: string = '';
 
   constructor(){}
 
