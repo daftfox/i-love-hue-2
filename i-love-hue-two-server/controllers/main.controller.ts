@@ -1,7 +1,7 @@
 import { WebsocketService } from '../services/websocket.service';
-import { Server } from 'ws';
-import { Game } from '../models/game.class'
-import { Subscription } from 'rxjs/Subscription';
+import { Server }           from 'ws';
+import { Game }             from '../models/game.class'
+import { Subscription }     from 'rxjs/Subscription';
 
 export class MainController {
     private websocketService: WebsocketService;
@@ -42,19 +42,23 @@ export class MainController {
         );
     }
 
-    private getGame(id: string): Game | void {
+    // Return game with the supplied id
+    // Why does TSLINT complain about the method possibly returning an undefined here, but not in the client?
+    private getGame(id: string): Game | undefined  {
         let game = this.games.find((game) => game.id === id);
-        if (game) {
-            return game;
-        }
+        return game;
     }
 
+    // A player has toggled his/her ready state
+    //  Toggle the player's ready state, get the corresponding Game object and notify its players
     private playerReady(message: any): void {
-        let game = <Game> this.getGame(message.game_id);
+        let game = this.getGame(message.game_id);
         if (game) {
-            let client = game.getClient(message.client_id);
+            let client  = game.getClient(message.client_id);
             let clients = game.getAllClients();
+
             client.toggleReady();
+
             for (let client of clients) {
                 this.websocketService.sendMessageToClient(
                     client.id,
@@ -67,12 +71,18 @@ export class MainController {
         }
     }
 
+    // A player wants to join a game
+    //  Attempt to add the player todo: or reply with a denial
+    //  Get the corresponding Game object and notify its players
+    //  of the new player and send the new player the required data
     private playerJoinGame(message: any): void {
-        let game = <Game>this.getGame(message.game_id);
+        let game = this.getGame(message.game_id);
         if (game) {
             game.addClient(message.client_id, message.client_name);
-            let clients = game.getAllClients();
+
+            let clients   = game.getAllClients();
             let newPlayer = game.getClient(message.client_id);
+
             for (let client of clients) {
 
                 // send new player a list of all players already in the lobby
@@ -108,6 +118,8 @@ export class MainController {
         }
     }
 
+    // A player has initiated a new game
+    //  Get the corresponding Game object and notify its players
     private initiateGame(message: any): void {
         let game = this.getGame(message.game_id);
         if (game) {
@@ -115,6 +127,7 @@ export class MainController {
                 let clients = game.getAllClients().map((c) => {
                     return {id: c.id, tiles: c.tiles}
                 });
+
                 this.websocketService.broadcastMessageInGame (
                     {
                         "event":   "initiate_game",
@@ -128,6 +141,7 @@ export class MainController {
         }
     }
 
+    // todo: refactor method and integrate with initiateGame. Rename initiateGame to startNewRound
     private newRound(gameId: string): void {
         let game = this.getGame(gameId);
         if (game) {
@@ -151,15 +165,18 @@ export class MainController {
     }
 
     private playerTileSwap(message: any): void {
-        let game = <Game> this.getGame(message.game_id);
-
-        // update timeout so game does not get removed for another ten minutes
-        clearTimeout(game.timeout);
-        this.updateTimeout(game.id);
+        let game = this.getGame(message.game_id);
 
         if (game) {
+
+            // update timeout after every tile swap so game does not get removed for another ten minutes
+            clearTimeout(game.timeout);
+            this.updateTimeout(game.id);
+
             let victory = ((playerVictory: boolean, game: Game) => {
-                for (let client of game.getAllClients()) {
+                let clients = game.getAllClients();
+
+                clients.forEach((client) => {
                     if (client.id !== message.client_id) {
                         this.websocketService.sendMessageToClient(
                             client.id,
@@ -174,7 +191,8 @@ export class MainController {
                             }
                         );
                     }
-                }
+                });
+
                 if (playerVictory) {
                     let winner = game.getClient(message.client_id);
                     //game.stopClock();
@@ -201,47 +219,62 @@ export class MainController {
         }
     }
 
+    // A player has forfeited or left the game
+    //  Get the corresponding Game object, remove the client from it and notify its players
     private playerForfeit(message: any): void {
-        let game = <Game> this.getGame(message.game_id);
-        game.removeClient(message.client_id);
-        this.websocketService.broadcastMessage(
-            {
-                "event":       "player_forfeit",
-                "client_id":   message.client_id,
-                "client_name": message.client_name
-            }
-        );
+        let game = this.getGame(message.game_id);
+        if (game) {
+            game.removeClient(message.client_id);
 
-        if (game.clients.length === 0) {
-            this.removeGame(game.id);
+            this.websocketService.broadcastMessage(
+                {
+                    "event":       "player_forfeit",
+                    "client_id":   message.client_id,
+                    "client_name": message.client_name
+                }
+            );
+
+            if (game.clients.length === 0) {
+                this.removeGame(game.id);
+            }
         }
     }
 
-    private removeGame(id: string): void {
-        let index = this.games.findIndex((g) => id === g.id);
-        if (index) this.games.splice(index, 1);
-        this.websocketService.removeGame(id);
-
-        console.log(`Removed game with id ${id}.`);
-    }
-
+    // The game has ended
+    //  Notify its players and remove it from the server
     private endGame(id: string): void {
         this.notifyEndGame(id);
         this.removeGame(id);
     }
 
-    private notifyEndGame(id: string): void {
-        let game = <Game> this.getGame(id);
-
-        // broadcast event to those that are still connected
-        this.websocketService.broadcastMessageInGame(
-            {
-                event: 'game_end'
-            },
-            game
-        );
+    // The game has ended
+    //  Remove the game with the supplied id from the list here as well as in the websocketService
+    private removeGame(id: string): void {
+        let index = this.games.findIndex((g) => id === g.id);
+        if (index) {
+            this.games.splice(index, 1);
+            this.websocketService.removeGame(id);
+            console.log(`Removed game with id ${id}.`);
+        }
     }
 
+    // The game has ended
+    //  Notify its players
+    private notifyEndGame(id: string): void {
+        let game = this.getGame(id);
+
+        if (game) {
+            // broadcast event to those that are still connected
+            this.websocketService.broadcastMessageInGame(
+                {
+                    event: 'game_end'
+                },
+                game
+            );
+        }
+    }
+
+    // Return a new timeout handler to auto remove the game after ten minutes of inactivity
     private updateTimeout(id: string): any {
         let timeoutHandler = (id: string) => {
             let endGame = this.endGame.bind(this);
@@ -253,6 +286,8 @@ export class MainController {
         }, 600000); // 10 minutes
     }
 
+    // A player has started a new game
+    //  Create a new Game object, add it to the websocketService, add the new player to the game and notify its players
     private startNewGame(message: any): void {
         // create a new game
         let newGame = new Game(message.game.mode, message.game.name, this.websocketService, message.game.difficulty);

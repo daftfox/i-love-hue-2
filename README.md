@@ -1,17 +1,17 @@
-# i-love-hue-2
+# I love hue 2
 ![Logo](images/logo.png)
 
 ## I love hue, but multiplayer!
 Have you wanted to test your gradient-swapping skills against your friends?
 Now you can! With I love hue 2 with realtime multiplayer capabilities.
+Based on the original game [I love hue](http://zutgames.com/i-love-hue.php) by [Zut games](http://zutgames.com/)
 
 The goal of this game is to solve a gradient where the colors have been swapped. Turn the board into an unadulterated 
 rainbow of colors.
 
-This game was built whithin a week and contains more than a few bugs.
-
 ### Prerequisites
-NodeJS
+* NodeJS
+* Git
 
 ### Clone
 run 
@@ -24,6 +24,7 @@ git pull origin develop
 ```
 in a terminal window.
 Give it a minute to complete. This game contains soundfiles that take a little while to download.
+
 ### Run
 Windows: 
 ```
