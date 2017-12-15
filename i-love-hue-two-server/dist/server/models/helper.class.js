@@ -25,12 +25,13 @@ class Helper {
                 oldArr = [];
             }
             else {
-                oldArr.splice(newArr.length - 1, newArr.length - oldArr.length - 1);
+                oldArr.splice(newArr.length - 1, (oldArr.length - newArr.length));
             }
         }
         oldArr.forEach((obj, index) => {
             Object.keys(obj).forEach((prop) => {
-                obj[prop] = newArr[index][prop];
+                if (newArr[index])
+                    obj[prop] = newArr[index][prop];
             });
         });
         return oldArr;

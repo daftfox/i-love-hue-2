@@ -53,7 +53,6 @@ export class WebsocketService {
 
                 // Remove the client on connection close
                 ws.on('close', () => {
-                    console.log(ws);
                     console.log(`Client ${client.name} with id: ${client.id} has closed the connection. Removing from the list.`);
                     clearInterval(updateInterval);
                     this.removeClient(client.id);
@@ -139,7 +138,6 @@ export class WebsocketService {
     // Remove a client by id
     public removeClient(clientId: string): void {
         let index = this.clients.findIndex((c) => c.id === clientId);
-
         this.clients.splice(index, 1);
     }
 
