@@ -1,5 +1,7 @@
 import { Client } from '../../../../../i-love-hue-two-server/models/client.class';
-import { Component, EventEmitter, Input, Output }
+import {
+  Component, EventEmitter, Input, OnChanges, OnDestroy, Output
+}
   from '@angular/core';
 import { trigger,style,transition,animate,keyframes,query,stagger }
   from '@angular/animations';
@@ -25,7 +27,7 @@ import { trigger,style,transition,animate,keyframes,query,stagger }
   ]
 })
 
-export class ChatLobbyComponent {
+export class ChatLobbyComponent implements OnChanges, OnDestroy{
   @Input()  players:  Array<any>;
   @Input()  messages: Array<any>;
   @Input()  self:     Client;
@@ -33,7 +35,21 @@ export class ChatLobbyComponent {
 
   chatMessage: string = '';
 
-  constructor(){}
+  tmp: any;
+
+  constructor(){
+    this.tmp = setInterval(() => {
+      console.log(this.players);
+    }, 10000);
+  }
+
+  ngOnChanges(changes) {
+    console.log(changes);
+  }
+
+  ngOnDestroy() {
+    clearInterval(this.tmp);
+  }
 
   send(): void {
     if (this.chatMessage) this.sendMessage.emit(this.chatMessage);

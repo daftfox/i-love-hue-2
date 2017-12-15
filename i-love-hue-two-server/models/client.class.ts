@@ -1,29 +1,36 @@
 import * as WebSocket from 'ws';
-import { Tile } from './tile.class';
-import { Helper } from './helper.class';
+import { Tile }       from './tile.class';
+import { Helper }     from './helper.class';
 
 export class Client {
     id:         string;
     name?:      string;
     tiles:      Tile[];
     tileSwaps:  number;
-    isReady:    boolean;
+    status:     number;
     score:      number;
     webSocket?: WebSocket;
 
     constructor(name?: string, webSocket?: WebSocket) {
-        this.id = Helper.generateId();
-        this.name = name;
-        this.score = 0;
+        this.id        = Helper.generateId();
+        this.name      = name;
+        this.score     = 0;
         this.tileSwaps = 0;
-        this.isReady = false;
+        this.status    = 0;
+
+        // Only used by the server
         if (webSocket) {
             this.webSocket = webSocket;
         }
     }
 
-    public toggleReady(): void {
-        this.isReady = !this.isReady;
+    // 0: connected
+    // 1: in_game_lobby
+    // 2: ready
+    // 3: in_game
+    // todo: make enum or other immutable set of states
+    public setStatus(status: number): void {
+        this.status = status;
     }
 
     public incrementScore(): void {

@@ -17,10 +17,7 @@ rainbow of colors.
 run 
 ```
 git clone https://github.com/daftfox/i-love-hue-2.git
-
 cd i-love-hue-2
-git checkout develop
-git pull origin develop
 ```
 in a terminal window.
 Give it a minute to complete. This game contains soundfiles that take a little while to download.

@@ -123,7 +123,7 @@
             <p>
               Click
               <button class="btn btn-sm btn-outline-primary"
-                            [ngClass]="{'ready': this.self.isReady}"
+                            [ngClass]="{'ready': this.self.status === 2}"
                             (click)="toggleSelfReady()">
                 <span>Ready</span>
               </button> once you are prepared.

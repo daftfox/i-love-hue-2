@@ -24,9 +24,8 @@ export class MainController {
                     case 'player_forfeit':
                         this.playerForfeit(message);
                         break;
-                    case 'player_ready':
-                    case 'player_not_ready':
-                        this.playerReady(message);
+                    case 'player_state_change':
+                        this.playerStateChange(message);
                         break;
                     case 'initiate_game':
                         this.initiateGame(message);
@@ -51,23 +50,20 @@ export class MainController {
 
     // A player has toggled his/her ready state
     //  Toggle the player's ready state, get the corresponding Game object and notify its players
-    private playerReady(message: any): void {
+    private playerStateChange(message: any): void {
         let game = this.getGame(message.game_id);
         if (game) {
             let client  = game.getClient(message.client_id);
-            let clients = game.getAllClients();
 
-            client.toggleReady();
-
-            for (let client of clients) {
-                this.websocketService.sendMessageToClient(
-                    client.id,
-                    {
-                        "event":     (client.isReady ? "player_ready" : "player_not_ready"),
-                        "client_id": message.client_id
-                    }
-                );
-            }
+            client.setStatus(message.client_status);
+            this.websocketService.broadcastMessageInGame(
+                {
+                    event:         'player_state_change',
+                    client_status: message.client_status,
+                    client_id:     message.client_id
+                },
+                game.id
+            )
         }
     }
 
@@ -80,41 +76,43 @@ export class MainController {
         if (game) {
             game.addClient(message.client_id, message.client_name);
 
-            let clients   = game.getAllClients();
             let newPlayer = game.getClient(message.client_id);
+            let clients   = game.getAllClients();
+
+            newPlayer.setStatus(1);
 
             for (let client of clients) {
-
                 // send new player a list of all players already in the lobby
                 this.websocketService.sendMessageToClient(
                     newPlayer.id,
                     {
-                        "event":         "player_joined",
-                        "client_id":     client.id,
-                        "client_name":   client.name,
-                        "client_ready":  client.isReady,
-                        "client_tiles":  client.tiles,
-                        "solution":      game.map.solution,
-                        "chat_messages": game.chatMessages,
-                        "game_name":     game.name,
-                        "game_id":       game.id
-                    }
-                );
-
-                // notify players in the lobby of new player
-                this.websocketService.sendMessageToClient(
-                    client.id,
-                    {
-                        "event":        "player_joined",
-                        "client_id":    newPlayer.id,
-                        "client_name":  newPlayer.name,
-                        "client_ready": false,
-                        "client_tiles": newPlayer.tiles,
-                        "game_name":    game.name,
-                        "game_id":      game.id
+                        event:         'player_joined',
+                        client_id:     client.id,
+                        client_name:   client.name,
+                        client_status: client.status,
+                        client_tiles:  client.tiles,
+                        solution:      game.map.solution,
+                        chat_messages: game.chatMessages,
+                        game_name:     game.name,
+                        game_id:       game.id
                     }
                 );
             }
+
+            // notify players in the lobby of new player
+            this.websocketService.broadcastMessageInGame(
+                {
+                    event:         'player_joined',
+                    client_id:     newPlayer.id,
+                    client_name:   newPlayer.name,
+                    client_ready:  false,
+                    client_status: newPlayer.status,
+                    client_tiles:  newPlayer.tiles,
+                    game_name:     game.name,
+                    game_id:       game.id
+                },
+                game.id
+            );
         }
     }
 
@@ -128,13 +126,17 @@ export class MainController {
                     return {id: c.id, tiles: c.tiles}
                 });
 
+                game.getAllClients().forEach((client) => {
+                    client.setStatus(3);
+                });
+
                 this.websocketService.broadcastMessageInGame (
                     {
-                        "event":   "initiate_game",
-                        "game_id": "game.id",
-                        "players": clients
+                        event:   'initiate_game',
+                        game_id: game.id,
+                        players: clients
                     },
-                    game
+                    game.id
                 );
             });
             game.initiate(initiate);
@@ -153,10 +155,10 @@ export class MainController {
                     });
                     this.websocketService.broadcastMessageInGame(
                         {
-                            "event":   "initiate_game",
-                            "players": clients
+                            event:   'initiate_game',
+                            players: clients
                         },
-                        game
+                        game.id
                     );
                 });
             });
@@ -181,12 +183,12 @@ export class MainController {
                         this.websocketService.sendMessageToClient(
                             client.id,
                             {
-                                "event":      "player_tile_swap",
-                                "client_id":  message.client_id,
-                                "tile_swaps": message.tile_swaps,
-                                "tile_swap": {
-                                    "from": message.tile_swap.from,
-                                    "to":   message.tile_swap.to
+                                event:      'player_tile_swap',
+                                client_id:  message.client_id,
+                                tile_swaps: message.tile_swaps,
+                                tile_swap: {
+                                    from: message.tile_swap.from,
+                                    to:   message.tile_swap.to
                                 }
                             }
                         );
@@ -199,11 +201,11 @@ export class MainController {
                     winner.incrementScore();
                     this.websocketService.broadcastMessageInGame(
                         {
-                            "event":        "player_win",
-                            "client_id":    message.client_id,
-                            "client_score": winner.score
+                            event:        'player_win',
+                            client_id:    message.client_id,
+                            client_score: winner.score
                         },
-                        game
+                        game.id
                     );
                     let newRoundHandler = (id: string) => {
                         let newRound  = this.newRound.bind(this);
@@ -224,14 +226,18 @@ export class MainController {
     private playerForfeit(message: any): void {
         let game = this.getGame(message.game_id);
         if (game) {
+            let client = game.getClient(message.client_id);
+            client.setStatus(0);
+
             game.removeClient(message.client_id);
 
-            this.websocketService.broadcastMessage(
+            this.websocketService.broadcastMessageInGame(
                 {
-                    "event":       "player_forfeit",
-                    "client_id":   message.client_id,
-                    "client_name": message.client_name
-                }
+                    event:       'player_forfeit',
+                    client_id:   message.client_id,
+                    client_name: message.client_name
+                },
+                game.id
             );
 
             if (game.clients.length === 0) {
@@ -269,7 +275,7 @@ export class MainController {
                 {
                     event: 'game_end'
                 },
-                game
+                game.id
             );
         }
     }
@@ -298,19 +304,22 @@ export class MainController {
 
         // add this client to the game
         newGame.addClient(message.client_id, message.client_name);
+        let newPlayer = newGame.getClient(message.client_id);
+        newPlayer.setStatus(1);
 
         // set timeout to remove game after ten minutes of inactivity (no tile-swaps)
         newGame.timeout = this.updateTimeout(newGame.id);
         this.websocketService.broadcastMessageInGame (
             {
-                "event":       "player_joined",
-                "client_id":   message.client_id,
-                "client_name": message.client_name,
-                "solution":    newGame.map.solution,
-                "game_name":   newGame.name,
-                "game_id":     newGame.id
+                event:         'player_joined',
+                client_id:     newPlayer.id,
+                client_name:   newPlayer.name,
+                client_status: newPlayer.status,
+                solution:      newGame.map.solution,
+                game_name:     newGame.name,
+                game_id:       newGame.id
             },
-            newGame
+            newGame.id
         );
     }
 }

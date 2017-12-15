@@ -20,7 +20,7 @@ class Game {
         this.websocketService = websocketService;
         this.difficulty = difficulty;
         this.map = this.generateMap();
-        this.state = 'ready';
+        this.status = 0;
         this.id = helper_class_1.Helper.generateId();
     }
     generateMap() {
@@ -32,7 +32,7 @@ class Game {
         callback();
     }
     initiate(callback) {
-        this.state = 'initiated';
+        this.status = 1;
         //this.startClock();
         this.generateAndSetTiles();
         callback(this);
@@ -64,8 +64,10 @@ class Game {
     }
     addClient(clientId, clientName) {
         let client = this.websocketService.getClient(clientId);
-        client.setName(clientName);
-        this.clients.push(client);
+        if (client) {
+            client.setName(clientName);
+            this.clients.push(client);
+        }
     }
     removeClient(id) {
         let index = this.clients.findIndex((client) => client.id === id);

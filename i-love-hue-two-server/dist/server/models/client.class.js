@@ -7,13 +7,19 @@ class Client {
         this.name = name;
         this.score = 0;
         this.tileSwaps = 0;
-        this.isReady = false;
+        this.status = 0;
+        // Only used by the server
         if (webSocket) {
             this.webSocket = webSocket;
         }
     }
-    toggleReady() {
-        this.isReady = !this.isReady;
+    // 0: connected
+    // 1: in_game_lobby
+    // 2: ready
+    // 3: in_game
+    // todo: make enum or other immutable set of states
+    setStatus(status) {
+        this.status = status;
     }
     incrementScore() {
         this.score++;

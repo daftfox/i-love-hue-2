@@ -9,17 +9,17 @@ class WebsocketService {
         this.server = websocketServer;
         this.connection = new Observable_1.Observable((observer) => {
             this.server.on('connection', (ws) => {
-                // store the client with an id and return it so we can use this as a reference later.
+                // store the client and return it so we can use this as a reference later.
                 let client = new client_class_1.Client(undefined, ws);
                 this.clients.push(client);
                 console.log(`New client connected with id: ${client.id}. Adding to the list.`);
-                let updateHandler = (ws) => {
+                let updateHandler = () => {
                     this.updatePlayerData.bind(this);
-                    return this.updatePlayerData(ws);
+                    return this.updatePlayerData(client.id);
                 };
-                // update player and games information every second
+                // update player and games information every three seconds
                 let updateInterval = setInterval(() => {
-                    return updateHandler(ws);
+                    return updateHandler();
                 }, 3000);
                 ws.on('message', (msg) => {
                     // parse the message and pass it on to the observer
@@ -29,113 +29,122 @@ class WebsocketService {
                         case 'player_update':
                             client.setName(message.client_name);
                             break;
-                        case 'global_chat_message':
-                            this.sendGlobalChat(message.client_name, client.id, message.text);
-                            break;
                         case 'game_chat_message':
-                            this.sendChat(message.client_name, client.id, message.game_id, message.text);
+                        case 'global_chat_message':
+                            this.sendChat(message);
                             break;
                         default:
                             observer.next(message);
                             break;
                     }
                 });
+                // Remove the client on connection close
                 ws.on('close', () => {
+                    console.log(ws);
                     console.log(`Client ${client.name} with id: ${client.id} has closed the connection. Removing from the list.`);
                     clearInterval(updateInterval);
                     this.removeClient(client.id);
                 });
-                let gamesJson = JSON.stringify(this.games.filter((game) => game.state !== 'initiated').map((game) => { return { name: game.name, id: game.id }; }));
-                let players = this.clients.filter((client) => client.name).map((client) => client.name);
-                let playersJson = JSON.stringify(players);
-                ws.send(`{
-                        "event": "connect_succesful",
-                        "users_on_server": ${this.clients.length},
-                        "client_id": "${client.id}",
-                        "games": ${gamesJson},
-                        "global_players": ${playersJson}
-                    }`);
+                let games = this.games.filter((game) => game.status === 0).map((game) => { return { name: game.name, id: game.id }; });
+                let players = this.clients.filter((client) => client.name).map((client) => {
+                    return {
+                        name: client.name,
+                        status: client.status
+                    };
+                });
+                let message = {
+                    event: 'connect_successful',
+                    client_id: client.id,
+                    games: games,
+                    global_players: players
+                };
+                this.sendMessageToClient(client.id, message);
             });
         });
     }
-    sendChat(clientName, clientId, game_id, chatMessage) {
-        let game = this.getGame(game_id);
-        for (let client of game.clients) {
-            if (client.webSocket) {
-                client.webSocket.send(`{
-                        "event": "game_chat_message",
-                        "client_id": "${clientId}",
-                        "client_name": "${clientName}",
-                        "chat_message": "${chatMessage}"
-                    }`);
-            }
+    sendChat(message) {
+        let chatMessage = {
+            event: message.event,
+            client_id: message.client_id,
+            client_name: message.client_name,
+            chat_message: message.chat_message
+        };
+        if (message.game_id) {
+            this.broadcastMessageInGame(chatMessage, message.game_id);
+        }
+        else {
+            this.broadcastMessage(chatMessage);
         }
     }
-    sendGlobalChat(clientName, clientId, chatMessage) {
-        for (let client of this.clients) {
-            if (client.webSocket) {
-                client.webSocket.send(`{
-                        "event": "global_chat_message",
-                        "client_id": "${clientId}",
-                        "client_name": "${clientName}",
-                        "chat_message": "${chatMessage}"
-                    }`);
-            }
-        }
+    updatePlayerData(clientId) {
+        let games = this.getUpdatedGames();
+        let players = this.getUpdatedClients();
+        let message = {
+            event: 'data_update',
+            global_players: players,
+            games: games
+        };
+        this.sendMessageToClient(clientId, message);
     }
-    updatePlayerData(ws) {
-        let games = JSON.stringify(this.games.filter((game) => game.state !== 'initiated').map((game) => {
-            return { id: game.id, name: game.name };
-        }));
-        let players = JSON.stringify(this.clients.map((client) => client.name));
-        ws.send(`{
-                "event": "data_update",
-                "global_players": ${players},
-                "games": ${games}
-            }`);
+    getUpdatedClients() {
+        return this.clients.map((client) => {
+            return {
+                id: client.id,
+                name: client.name,
+                status: client.status
+            };
+        });
     }
+    getUpdatedGames() {
+        return this.games.map((game) => {
+            return {
+                id: game.id,
+                name: game.name,
+                status: game.status
+            };
+        });
+    }
+    // Get client from the current list of games by id
     getClient(clientId) {
         return this.clients.find((client) => client.id === clientId);
     }
-    getGame(id) {
-        let game = this.games.find((game) => game.id === id);
-        if (game) {
-            return game;
-        }
+    // Get game from the current list of games by id
+    getGame(gameId) {
+        return this.games.find((game) => game.id === gameId);
     }
-    removeClient(id) {
-        let index = this.clients.findIndex((c) => c.id === id);
+    // Remove a client by id
+    removeClient(clientId) {
+        let index = this.clients.findIndex((c) => c.id === clientId);
         this.clients.splice(index, 1);
     }
-    removeGame(id) {
-        let index = this.games.findIndex((c) => c.id === id);
+    // Remove a game by id
+    removeGame(clientId) {
+        let index = this.games.findIndex((c) => c.id === clientId);
         this.games.splice(index, 1);
     }
+    // Return all currently connected clients
     getAllClients() {
         return this.clients;
     }
+    // Send message to every connected client
     broadcastMessage(message) {
         this.clients.forEach((client) => {
-            this.sendMessage(client, message);
+            this.sendMessageToClient(client.id, message);
         });
     }
-    broadcastMessageInGame(message, game) {
-        game.getAllClients().forEach((client) => {
-            this.sendMessage(client, message);
-        });
+    // Send message to every player in the game whose id is supplied
+    broadcastMessageInGame(message, gameId) {
+        let game = this.getGame(gameId);
+        if (game) {
+            game.getAllClients().forEach((client) => {
+                this.sendMessageToClient(client.id, message);
+            });
+        }
     }
+    // Send a websocket message
     sendMessageToClient(clientId, message) {
-        let client = this.clients.find((client) => client.id === clientId);
-        if (client) {
-            this.sendMessage(client, message);
-        }
-        else {
-            // we lost a client?!
-            console.log('uh oh..');
-        }
-    }
-    sendMessage(client, message) {
-        if (client.webSocket) {
+        let client = this.getClient(clientId);
+        if (client && client.webSocket) {
             try {
                 client.webSocket.send(JSON.stringify(message));
             }

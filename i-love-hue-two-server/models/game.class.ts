@@ -22,7 +22,7 @@ export class Game {
     mode:             GameMode;
     clients:          Client[]   = [];
     chatMessages:     Array<any> = [];
-    state:            string;
+    status:           number;
     time:             number;
     difficulty:       number;
     clock:            any;
@@ -56,7 +56,7 @@ export class Game {
         this.websocketService = websocketService;
         this.difficulty       = difficulty;
         this.map              = this.generateMap();
-        this.state            = 'ready';
+        this.status           = 0;
         this.id               = Helper.generateId();
     }
 
@@ -77,7 +77,7 @@ export class Game {
     }
 
     public initiate(callback: any): void {
-        this.state = 'initiated';
+        this.status = 1;
         //this.startClock();
 
         this.generateAndSetTiles();
@@ -117,8 +117,11 @@ export class Game {
 
     public addClient(clientId: string, clientName: string): void {
         let client = this.websocketService.getClient(clientId);
-        client.setName(clientName);
-        this.clients.push(client);
+
+        if (client) {
+            client.setName(clientName);
+            this.clients.push(client);
+        }
     }
 
     public removeClient(id: string): void {

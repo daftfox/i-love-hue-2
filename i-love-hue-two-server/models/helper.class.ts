@@ -14,21 +14,27 @@ export class Helper {
         return Math.floor(Math.random()*(max-min+1)+min);
     }
 
-    public static updateArray(oldArr: Array<any>, newArr: Array<any>): void {
+    public static updateArray(oldArr: Array<any>, newArr: Array<any>): Array<any | void> {
         if (newArr.length > oldArr.length) {
             newArr.forEach((obj, index) => {
                 if (!oldArr[index]) { // new element
                     oldArr.push(obj);
-                } else {
-                    // updated element
-                    Object.keys(obj).forEach((prop) => {
-                        oldArr[index][prop] = obj[prop];
-                    });
                 }
             });
-        } else {
-            if (newArr.length === 0) oldArr.splice(0, 1);
-            else oldArr.splice(newArr.length - 1, oldArr.length - 1);
+        } else if (newArr.length < oldArr.length) {
+            if (newArr.length === 0) {
+                oldArr = [];
+            } else {
+                oldArr.splice(newArr.length - 1, newArr.length - oldArr.length - 1);
+            }
         }
+
+        oldArr.forEach((obj, index) => {
+            Object.keys(obj).forEach((prop) => {
+                obj[prop] = newArr[index][prop];
+            });
+        });
+
+        return oldArr;
     }
 }

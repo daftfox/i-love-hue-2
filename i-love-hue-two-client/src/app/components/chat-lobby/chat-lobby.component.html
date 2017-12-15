@@ -6,7 +6,8 @@
           <div class="col-6">
             <small>Name</small>
           </div>
-          <div class="col-3">
+          <div class="col-3"
+               *ngIf="players[0] && players[0].score >= 0">
             <small>Score</small>
           </div>
           <div class="col-3">
@@ -23,10 +24,15 @@
             {{player.score}}
           </div>
           <div class="col-3">
-            <span class="green"
-                  *ngIf="player.isReady">
+            <div class="row no-gutters"
+                 [ngClass]="{'yellow': player.status === 1, 'peach': player.status === 3}"
+                 *ngIf="player.status === 1 || player.status === 3">
+              In game
+            </div>
+            <div class="green row no-gutters"
+                  *ngIf="player.status === 2">
               Ready
-            </span>
+            </div>
           </div>
         </div>
       </div>

@@ -26,9 +26,9 @@ import { Helper }         from '../../../i-love-hue-two-server/models/helper.cla
 })
 
 export class AppComponent {
-  defaultUrl = 'ws://timothy.fyi:8999';
-  startTime  = '';
-  countdown  = '';
+  defaultUrl                      = 'ws://timothy.fyi:8999';
+  startTime                       = '';
+  countdown                       = '';
   globalMessages:   Array<any>    = [];
   messages:         Array<any>    = [];
   games:            Array<any>    = [];
@@ -67,8 +67,8 @@ export class AppComponent {
       // console.log(`Event received: `, message);
 
       switch (message.event) {
-        case 'connect_succesful':
-          this.connectSuccesful(message);
+        case 'connect_successful':
+          this.connectSuccessful(message);
           break;
         case 'player_joined':
           this.playerJoined(message);
@@ -76,8 +76,7 @@ export class AppComponent {
         case 'initiate_game':
           this.initiateGame(message);
           break;
-        case 'player_ready':
-        case 'player_not_ready':
+        case 'player_state_change':
           this.playerReady(message);
           break;
         case 'player_tile_swap':
@@ -104,19 +103,25 @@ export class AppComponent {
     });
   }
 
-  // Client succesfully connected to server
-  // Set correct state and own Client object
-  private connectSuccesful(message: any): void {
+  // Client successfully connected to server
+  //  Set correct state and own Client object
+  private connectSuccessful(message: any): void {
     this.setState('select');
     this.setSelf(message.client_id, this.playerName);
 
     this.games         = message.games;
-    this.globalPlayers = message.global_players.map((player) => { return {name: player}; });
+    this.globalPlayers = message.global_players.map((player) => {
+      return {
+        id: player.id,
+        name: player.name,
+        status: player.status
+      }
+    });
   }
 
   // The client or an opponent has joined the game
-  // Set correct state and (if applicable) add opponent to list of players in this game
-  // Set the game's solution so we can display it as an example on the game lobby page
+  //  Set correct state and (if applicable) add opponent to list of players in this game
+  //  Set the game's solution so we can display it as an example on the game lobby page
   private playerJoined(message: any): void {
     if (message.client_id === this.self.id) {
       this.setState('lobby');
@@ -124,6 +129,9 @@ export class AppComponent {
       this.gameId         = message.game_id;
       this.gameName       = message.game_name;
       this.messages       = message.chat_messages || [];
+
+      this.self.setStatus(message.client_status);
+
       if (message.solution) {
         this.solution.tiles = message.solution;
       }
@@ -131,13 +139,15 @@ export class AppComponent {
       let newPlayer = new Client(message.client_name);
       newPlayer.id = message.client_id;
       newPlayer.setTiles(message.client_tiles);
-      newPlayer.isReady = message.client_ready;
+      newPlayer.setStatus(message.client_status);
+
+      newPlayer.setStatus(message.status);
       this.players.push(newPlayer);
     }
   }
 
   // The current game has been initiated
-  // Set the correct state, each player's tiles and remove the win/lose message.
+  //  Set the correct state, each player's tiles and remove the win/lose message.
   private initiateGame(message: any): void{
     this.setTiles(<Client[]> message.players);
     this.celebrations = null;
@@ -145,16 +155,16 @@ export class AppComponent {
   }
 
   // A player in the current game is ready to start the game
-  // Toggle the ready state of the local copy of the client
+  //  Toggle the ready state of the local copy of the client
   private playerReady(message: any): void{
     if (message.client_id !== this.self.id) {
-      this.getPlayer(message.client_id).toggleReady();
+        this.getPlayer(message.client_id).setStatus(message.client_statue);
     }
   }
 
   // A player has swapped two tiles
-  // Apply the mutation to the tiles and, if this method was triggered from the
-  // player's own field, notify the server.
+  //  Apply the mutation to the tiles and, if this method was triggered from the
+  //  player's own field, notify the server.
   tileSwap(id: string, tileSwap: any): void {
     if (this.celebrations) {
       // the game is over, no more swaps!
@@ -185,33 +195,33 @@ export class AppComponent {
     if (this.self.id === player.id) {
       this.sendMessage(
         {
-          event: "player_tile_swap",
-          client_id: this.self.id,
-          tile_swap: tileSwap,
+          event:      'player_tile_swap',
+          client_id:  this.self.id,
+          tile_swap:  tileSwap,
           tile_swaps: player.tileSwaps,
-          game_id: this.gameId
+          game_id:    this.gameId
         }
       );
     }
   }
 
   // A player has left the game or forfeited
-  // Add a notification in the chat and remove the player from the list
+  //  Add a notification in the chat and remove the player from the list
   private playerForfeit(message: any): void {
     let index = this.players.findIndex((player) => player.id === message.client_id);
     let name =  this.getPlayer(message.client_id).name;
 
     this.messages.unshift({
-      sender:         'Server',
-      client_id:      'admin',
-      chat_message:   `Player ${name} has forfeited the game.`
+      sender:       'Server',
+      client_id:    'admin',
+      chat_message: `Player ${name} has forfeited the game.`
     });
     if (message.client_id !== this.self.id) this.players.splice(index, 1);
     else this.players = [];
   }
 
   // The game has ended or a player has won
-  // Either way display the win/lose message
+  //  Either way display the win/lose message
   endGame(message: any): void {
     if (message.event === 'game_end') {
       this.resetToServerLobby();
@@ -226,15 +236,14 @@ export class AppComponent {
   }
 
   // The server has sent us a new update of available, global, data
-  // Update global games and connected players
+  //  Update global games and connected players
   private dataUpdate(message: any): void {
     Helper.updateArray(this.games, message.games);
-    let newPlayers = message.global_players.map((player) => { return {name: player}; });
-    Helper.updateArray(this.globalPlayers, newPlayers);
+    Helper.updateArray(this.globalPlayers, message.global_players);
   }
 
   // A new chat message has been received
-  // Add it to the correct list of messages already received
+  //  Add it to the correct list of messages already received
   private chatMessage(message: any): void{
     if (message.event === 'global_chat_message') {
       this.globalMessages.unshift({
@@ -279,6 +288,7 @@ export class AppComponent {
   // Set correct state and clean up variables
   private resetToServerLobby(): void {
     this.setState('select');
+    this.self.setStatus(0);
     this.gameId   = null;
     this.gameName = null;
     this.messages = [];
@@ -350,14 +360,19 @@ export class AppComponent {
 
   // Toggle player ready state
   toggleSelfReady(): void {
-    this.self.toggleReady();
-    this.sendMessage(
-      {
-        event:     (this.self.isReady ? 'player_ready' : 'player_not_ready'),
-        client_id: this.self.id,
-        game_id:   this.gameId
-      }
-    );
+    if (this.self.status === 1) {
+      this.self.setStatus(2);
+      this.sendMessage(
+        {
+          event:         'player_state_change',
+          client_status: this.self.status,
+          client_id:     this.self.id,
+          game_id:       this.gameId
+        }
+      );
+    } else {
+      this.self.setStatus(1);
+    }
   }
 
   // The player initiates the current game
@@ -386,21 +401,22 @@ export class AppComponent {
   // The player sends a chat message
   sendChatMessage(chatMessage): void {
     this.sendMessage({
-      event:       'game_chat_message',
-      client_id:   this.self.id,
-      client_name: this.self.name,
-      game_id:     this.gameId,
-      text:        chatMessage          // todo: check for evil code in chat message or limit allowed characters
+      event:        'game_chat_message',
+      client_id:    this.self.id,
+      client_name:  this.self.name,
+      game_id:      this.gameId,
+      chat_message: chatMessage          // todo: check for evil code in chat message or limit allowed characters
     });
   }
 
   // The player sends a global chat message
   sendGlobalChatMessage(chatMessage): void {
+    console.log(chatMessage);
     this.sendMessage({
-      event:       'global_chat_message',
-      client_id:   this.self.id,
-      client_name: this.self.name,
-      text:        chatMessage          // todo: check for evil code in chat message or limit allowed characters
+      event:        'global_chat_message',
+      client_id:    this.self.id,
+      client_name:  this.self.name,
+      chat_message: chatMessage          // todo: check for evil code in chat message or limit allowed characters
     });
   }
 
@@ -411,8 +427,8 @@ export class AppComponent {
 
   // Validator function for deciding whether or not the game can be initiated
   canStartGame(): boolean {
-    // Are there players in the current list that are not ready yet?
-    let playerNotReady = this.players.find((player) => !player.isReady);
+    // Are there players in the current list that are in the lobby but not yet ready?
+    let playerNotReady = this.players.find((player) => player.status === 1);
     return !(this.players.length !== 0 && typeof playerNotReady != typeof undefined);
   }
 
