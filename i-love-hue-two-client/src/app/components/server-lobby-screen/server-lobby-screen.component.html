@@ -1,0 +1,47 @@
+<div>
+  <div class="row">
+    <div class="col-12 text-center m-t-3">
+      <label for="game-name">Game name: <small>(optional)</small></label>
+      <input id="game-name" class="" type="text" [(ngModel)]="name" />
+    </div>
+
+    <div class="col-6 text-center m-t-3">
+      <div>Game difficulty: </div>
+      <input class="" type="radio" [value]="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
+      <input class="" type="radio" [value]="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
+      <input class="" type="radio" [value]="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
+    </div>
+
+    <div class="col-6 text-center m-t-3">
+      <div>Board size: </div>
+      <input class="" type="radio" [value]="0" name="mode" [(ngModel)]="mode" /> 8x8
+      <input class="" type="radio" [value]="1" name="mode" [(ngModel)]="mode" /> 10x10
+      <input class="" type="radio" [value]="2" name="mode" [(ngModel)]="mode" /> 15x15
+    </div>
+
+    <div class="col-12 text-center m-t-3">
+      <button class="btn btn-lg btn-outline-primary"
+              (click)="newGame(name, difficulty, mode)">
+        <span>New game</span>
+      </button>
+    </div>
+
+    <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
+      <span>Available games: <small></small></span>
+      <select [(ngModel)]="selectedGame">
+        <option [value]="game.id"
+                *ngFor="let game of games">
+          {{game.name}}
+        </option>
+      </select>
+    </div>
+    <div class="col-12 text-center m-t-3 m-b-1" *ngIf="games.length > 0">
+      <button class="btn btn-lg btn-outline-primary"
+              [ngClass]="{'disabled': !selectedGame}"
+              [disabled]="!selectedGame"
+              (click)="joinGame(selectedGame)">
+        <span>Join game</span>
+      </button>
+    </div>
+  </div>
+</div>

@@ -1,0 +1,43 @@
+<div>
+  <div class="row justify-content-center">
+    <div class="col-6 text-right m-t-3">
+      <label for="url">Server url: <small>(optional)</small></label>
+    </div>
+    <div class="col-6 m-t-3">
+      <input id="url" type="text" [(ngModel)]="url" />
+    </div>
+
+    <div *ngIf="connectionError"
+         class="col-12 text-center">
+      <p class="peach">There was an error connecting to the supplied url.</p>
+      <p><small>Keep in mind: the server url should look like this: ws://192.168.1.1:8999</small></p>
+    </div>
+
+    <div class="col-6 text-right m-t-3">
+      <label for="player-name">Player name: <small>(required)</small></label>
+    </div>
+    <div class="col-6 m-t-3">
+      <input id="player-name" type="text" [(ngModel)]="name" />
+    </div>
+
+    <div class="col-12 text-center m-t-3">
+      <button class="btn btn-lg btn-outline-primary"
+              [ngClass]="{'disabled': !name}"
+              (click)="connectToServer(name, url)"
+              [disabled]="!name">
+        <span>Connect</span>
+      </button>
+    </div>
+  </div>
+  <div class="row justify-content-center">
+    <div class="col m-t-3 text-center">
+      <div class="d-none d-lg-block">
+        <h3>Hey there! This game is best played in full-screen mode!</h3>
+        <p class="go-full-screen">
+          (press the F11 key on the keyboard to go to full-screen mode.)
+        </p>
+      </div>
+      <small>Music by the Blue Dot Sessions</small>
+    </div>
+  </div>
+</div>

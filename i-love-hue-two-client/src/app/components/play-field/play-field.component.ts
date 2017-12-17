@@ -11,6 +11,7 @@ export class PlayFieldComponent {
   @Input()  player:   Client;
   @Input()  ownBoard: boolean;
   @Input()  gameOver: boolean;
+
   @Output() boardUpdated = new EventEmitter();
 
   tileSwap(tileSwap: any) {

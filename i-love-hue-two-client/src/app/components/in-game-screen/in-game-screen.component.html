@@ -1,0 +1,16 @@
+<div>
+  <div class="row play-screen no-gutters justify-content-center">
+    <div class="col-12 col-md-10 col-lg-8">
+      <div [ngClass]="{'celebrations': celebrations}"
+           class="celebration-panel">
+        <span *ngIf="celebrations === 'win'">You win!</span>
+        <span *ngIf="celebrations === 'lose'" class="peach">You lose!</span>
+        <clock [countdown]="countdown" (countdownDone)="countdownFinished()"></clock>
+      </div>
+      <play-field [ownBoard]="true"
+                  [player]="self"
+                  [gameOver]="gameOver()"
+                  (boardUpdated)="tileSwap($event)"></play-field>
+    </div>
+  </div>
+</div>

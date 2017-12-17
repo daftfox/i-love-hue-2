@@ -39,28 +39,24 @@ export class AppComponent {
   select:           boolean       = false;
   lobby:            boolean       = false;
   play:             boolean       = false;
-  difficulty:       number        = 0;
-  mode:             number        = 0;
   messageService:   MessageService;
   self:             Client;
   gameName:         string;
-  customUrl:        string;
   playerName:       string;
   gameId:           string;
-  url:              string;
   celebrations:     string;
-  selectedGame:     string;
   solution:         any = {tiles: null};
 
   constructor() {
     this.setState('splash');
   }
 
-  connectToGame() {
+  connectToServer(args) {
     this.connectionError = false;
-    this.url = (this.customUrl && this.customUrl.length > 0 ? this.customUrl : this.defaultUrl);
+    let url = (args.url && args.url.length > 0 ? args.url : this.defaultUrl);
+    this.playerName = args.name;
 
-    this.messageService = new MessageService(this.url);
+    this.messageService = new MessageService(url);
 
     this.messageService.messages.subscribe((message) => {
       // todo: only log when in dev mode
@@ -80,7 +76,7 @@ export class AppComponent {
           this.playerReady(message);
           break;
         case 'player_tile_swap':
-          this.tileSwap(message.client_id, message.tile_swap);
+          this.opponentTileSwap(message.client_id, message.tile_swap);
           break;
         case 'player_forfeit':
           this.playerForfeit(message);
@@ -165,11 +161,47 @@ export class AppComponent {
   // A player has swapped two tiles
   //  Apply the mutation to the tiles and, if this method was triggered from the
   //  player's own field, notify the server.
-  tileSwap(id: string, tileSwap: any): void {
+  tileSwap(args): void {
     if (this.celebrations) {
       // the game is over, no more swaps!
       return;
     }
+    let tile1Index = this.self.tiles.findIndex((tile) => {
+      return tile.id === args.tileSwap.from;
+    });
+    let tile2Index = this.self.tiles.findIndex((tile) => {
+      return tile.id === args.tileSwap.to;
+    });
+
+    // make deep clone of tiles
+    let tilesCopy = JSON.parse(JSON.stringify(this.self.tiles));
+
+    tilesCopy[tile1Index].x = this.self.tiles[tile2Index].x;
+    tilesCopy[tile1Index].y = this.self.tiles[tile2Index].y;
+    tilesCopy[tile2Index].x = this.self.tiles[tile1Index].x;
+    tilesCopy[tile2Index].y = this.self.tiles[tile1Index].y;
+
+    // reassign tiles. changes object reference, thus triggering the board's onChange() method
+    // todo: research if we can simplify board drawing mechanism by only updating the specific array elements
+    // todo: instead of reassigning the whole array
+    this.self.setTiles(tilesCopy);
+    this.self.tileSwaps++;
+
+    this.sendMessage(
+      {
+        event:      'player_tile_swap',
+        client_id:  this.self.id,
+        tile_swap:  args.tileSwap,
+        tile_swaps: this.self.tileSwaps,
+        game_id:    this.gameId
+      }
+    );
+  }
+
+  // A player has swapped two tiles
+  //  Apply the mutation to the tiles and, if this method was triggered from the
+  //  player's own field, notify the server.
+  opponentTileSwap(id: string, tileSwap: any): void {
     let player = this.getPlayer(id);
     let tile1Index = player.tiles.findIndex((tile) => {
       return tile.id === tileSwap.from;
@@ -191,18 +223,6 @@ export class AppComponent {
     // todo: instead of reassigning the whole array
     player.setTiles(tilesCopy);
     player.tileSwaps++;
-
-    if (this.self.id === player.id) {
-      this.sendMessage(
-        {
-          event:      'player_tile_swap',
-          client_id:  this.self.id,
-          tile_swap:  tileSwap,
-          tile_swaps: player.tileSwaps,
-          game_id:    this.gameId
-        }
-      );
-    }
   }
 
   // A player has left the game or forfeited
@@ -314,16 +334,16 @@ export class AppComponent {
   }
 
   // The player clicks the 'New game' button
-  newGame(name: string, difficulty: number, mode: number): void {
+  newGame(args): void {
     this.sendMessage(
       {
         event:       'start_new_game',
         client_id:   this.self.id,
         client_name: this.self.name,
         game: {
-          name:       name,
-          mode:       mode,
-          difficulty: difficulty
+          name:       args.name,
+          mode:       args.mode,
+          difficulty: args.difficulty
         }
       }
     );
@@ -359,7 +379,7 @@ export class AppComponent {
   }
 
   // Toggle player ready state
-  toggleSelfReady(): void {
+  toggleReady(): void {
     if (this.self.status === 1) {
       this.self.setStatus(2);
       this.sendMessage(
@@ -387,13 +407,13 @@ export class AppComponent {
   }
 
   // The player joins a game
-  joinGame() : void {
+  joinGame(args) : void {
     this.sendMessage(
       {
         event:       'player_join_game',
         client_id:   this.self.id,
         client_name: this.self.name,
-        game_id:     this.selectedGame
+        game_id:     args.selectedGame
       }
     );
   }
@@ -411,7 +431,6 @@ export class AppComponent {
 
   // The player sends a global chat message
   sendGlobalChatMessage(chatMessage): void {
-    console.log(chatMessage);
     this.sendMessage({
       event:        'global_chat_message',
       client_id:    this.self.id,
@@ -423,19 +442,6 @@ export class AppComponent {
   // Shorthand function for sending messages using the messageService
   private sendMessage(message: any): void {
     this.messageService.messages.next(message);
-  }
-
-  // Validator function for deciding whether or not the game can be initiated
-  canStartGame(): boolean {
-    // Are there players in the current list that are in the lobby but not yet ready?
-    let playerNotReady = this.players.find((player) => player.status === 1);
-    return !(this.players.length !== 0 && typeof playerNotReady != typeof undefined);
-  }
-
-  // Validation function returning true when the current round has finished
-  gameOver(): boolean {
-    if (this.celebrations) return true;
-    else return false;
   }
 
   // Start the clock

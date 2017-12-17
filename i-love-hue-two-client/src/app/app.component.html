@@ -7,164 +7,34 @@
            *ngIf="!play && !lobby">
         <title-header></title-header>
       </div>
-      <div class="splash-screen"
-           *ngIf="splash">
-        <div class="row justify-content-center">
-          <div class="col-6 text-right m-t-3">
-            <label for="url">Server url: <small>(optional)</small></label>
-          </div>
-          <div class="col-6 m-t-3">
-            <input id="url" type="text" [(ngModel)]="customUrl" />
-          </div>
+      <welcome-screen *ngIf="splash"
+                      (connect)="connectToServer($event)">
+      </welcome-screen>
 
-          <div *ngIf="connectionError"
-               class="col-12 text-center">
-            <p class="peach">There was an error connecting to the supplied url.</p>
-            <p><small>Keep in mind: the server url should look like this: ws://192.168.1.1:8999</small></p>
-          </div>
+      <server-lobby-screen *ngIf="select"
+                           [games]="games"
+                           (join)="joinGame($event)"
+                           (startNew)="newGame($event)">
+      </server-lobby-screen>
 
-          <div class="col-6 text-right m-t-3">
-            <label for="player-name">Player name: <small>(required)</small></label>
-          </div>
-          <div class="col-6 m-t-3">
-            <input id="player-name" type="text" [(ngModel)]="playerName" />
-          </div>
+      <game-lobby-screen *ngIf="lobby"
+                         [gameName]="gameName"
+                         [self]="self"
+                         [players]="players"
+                         [solution]="solution"
+                         (start)="startGame()"
+                         (toggle)="toggleReady()">
+      </game-lobby-screen>
 
-          <div class="col-12 text-center m-t-3">
-            <button class="btn btn-lg btn-outline-primary"
-                    [ngClass]="{'disabled': !playerName}"
-                    (click)="connectToGame(playerName, customUrl)"
-                    [disabled]="!playerName">
-              <span>Connect</span>
-            </button>
-          </div>
-        </div>
-        <div class="row justify-content-center">
-          <div class="col m-t-3 text-center">
-            <div class="d-none d-lg-block">
-              <h3>Hey there! This game is best played in full-screen mode!</h3>
-              <p class="go-full-screen">
-                (press the F11 key on the keyboard to go to full-screen mode.)
-              </p>
-            </div>
-            <small>Music by the Blue Dot Sessions</small>
-          </div>
-        </div>
-      </div>
+      <in-game-screen *ngIf="play"
+                      [celebrations]="celebrations"
+                      [self]="self"
+                      [countdown]="countdown"
+                      (countdownDone)="setCountdown('')"
+                      (swap)="tileSwap($event)">
+      </in-game-screen>
 
-      <div *ngIf="select"
-           class="game-select">
-        <div class="row">
-          <div class="col-12 text-center m-t-3">
-            <label for="game-name">Game name: <small>(optional)</small></label>
-            <input id="game-name" class="" type="text" #gameName />
-          </div>
 
-          <div class="col-6 text-center m-t-3">
-            <div>Game difficulty: </div>
-            <input class="" type="radio" [value]="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
-            <input class="" type="radio" [value]="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
-            <input class="" type="radio" [value]="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
-          </div>
-
-          <div class="col-6 text-center m-t-3">
-            <div>Board size: </div>
-            <input class="" type="radio" [value]="0" name="mode" [(ngModel)]="mode" /> 8x8
-            <input class="" type="radio" [value]="1" name="mode" [(ngModel)]="mode" /> 10x10
-            <input class="" type="radio" [value]="2" name="mode" [(ngModel)]="mode" /> 15x15
-          </div>
-
-          <div class="col-12 text-center m-t-3">
-            <button class="btn btn-lg btn-outline-primary"
-                    (click)="newGame(gameName.value, difficulty, mode)">
-              <span>New game</span>
-            </button>
-          </div>
-
-          <div class="col-12 text-center m-t-3" *ngIf="games.length > 0">
-            <span>Available games: <small></small></span>
-            <select [(ngModel)]="selectedGame">
-              <option [value]="game.id"
-                      *ngFor="let game of games">
-                {{game.name}}
-              </option>
-            </select>
-          </div>
-          <div class="col-12 text-center m-t-3 m-b-1" *ngIf="games.length > 0">
-            <button class="btn btn-lg btn-outline-primary"
-                    [ngClass]="{'disabled': !selectedGame}"
-                    [disabled]="!selectedGame"
-                    (click)="joinGame()">
-              <span>Join game</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div *ngIf="lobby"
-           class="game-lobby">
-        <div class="row">
-          <div class="col-12 text-center m-t-3">
-            <h2>Get ready for {{gameName}}!</h2>
-            <p>
-              Once the game has initiated, you are presented with a large playing field.
-              When this playing field was generated, it contained an eye pleasing gradient like below,
-              however on your board these tiles have been scrambled!
-            </p>
-            <play-field [ownBoard]="false"
-                        [player]="solution"
-                        [gameOver]="false">
-            </play-field>
-            <p>
-              It's your task to rearrange the scrambled tiles and make the playing field great again!
-              Click a swap-able tile, the ones with a black dot are <strong>not</strong> swap-able, and click
-              the other tile you want to swap it with.
-            </p>
-            <p>
-              Click
-              <button class="btn btn-sm btn-outline-primary"
-                            [ngClass]="{'ready': this.self.status === 2}"
-                            (click)="toggleSelfReady()">
-                <span>Ready</span>
-              </button> once you are prepared.
-              The game can be initiated by any player as soon as everybody is ready.
-            </p>
-          </div>
-
-          <div class="col-12 text-center m-t-3 m-b-1">
-            <button class="btn btn-lg btn-outline-primary"
-                    [ngClass]="{'disabled': !canStartGame()}"
-                    (click)="canStartGame() && startGame()"
-                    [disabled]="!canStartGame()">
-              <span>Start game</span>
-            </button>
-            <button class="btn btn-lg btn-outline-primary"
-                    [ngClass]="{'disabled': canStartGame()}"
-                    (click)="leaveGame()"
-                    [disabled]="canStartGame()">
-              <span>Leave game</span>
-            </button>
-          </div>
-        </div>
-      </div>
-
-      <div
-           *ngIf="play">
-        <div class="row play-screen no-gutters justify-content-center">
-          <div class="col-12 col-md-10 col-lg-8">
-            <div [ngClass]="{'celebrations': celebrations}"
-                 class="celebration-panel">
-              <span *ngIf="celebrations === 'win'">You win!</span>
-              <span *ngIf="celebrations === 'lose'" class="peach">You lose!</span>
-              <clock [countdown]="countdown" (countdownDone)="setCountdown('')"></clock>
-            </div>
-            <play-field [ownBoard]="true"
-                        [player]="self"
-                        [gameOver]="gameOver()"
-                        (boardUpdated)="tileSwap(self.id, $event)"></play-field>
-          </div>
-        </div>
-      </div>
     </div>
 
     <div id="lobby"
