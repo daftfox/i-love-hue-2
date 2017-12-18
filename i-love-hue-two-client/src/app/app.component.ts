@@ -158,56 +158,12 @@ export class AppComponent {
     }
   }
 
-  // A player has swapped two tiles
-  //  Apply the mutation to the tiles and, if this method was triggered from the
-  //  player's own field, notify the server.
-  tileSwap(args): void {
-    if (this.celebrations) {
-      // the game is over, no more swaps!
-      return;
-    }
-    let tile1Index = this.self.tiles.findIndex((tile) => {
-      return tile.id === args.tileSwap.from;
-    });
-    let tile2Index = this.self.tiles.findIndex((tile) => {
-      return tile.id === args.tileSwap.to;
-    });
-
-    // make deep clone of tiles
-    let tilesCopy = JSON.parse(JSON.stringify(this.self.tiles));
-
-    tilesCopy[tile1Index].x = this.self.tiles[tile2Index].x;
-    tilesCopy[tile1Index].y = this.self.tiles[tile2Index].y;
-    tilesCopy[tile2Index].x = this.self.tiles[tile1Index].x;
-    tilesCopy[tile2Index].y = this.self.tiles[tile1Index].y;
-
-    // reassign tiles. changes object reference, thus triggering the board's onChange() method
-    // todo: research if we can simplify board drawing mechanism by only updating the specific array elements
-    // todo: instead of reassigning the whole array
-    this.self.setTiles(tilesCopy);
-    this.self.tileSwaps++;
-
-    this.sendMessage(
-      {
-        event:      'player_tile_swap',
-        client_id:  this.self.id,
-        tile_swap:  args.tileSwap,
-        tile_swaps: this.self.tileSwaps,
-        game_id:    this.gameId
-      }
-    );
-  }
-
-  // A player has swapped two tiles
-  //  Apply the mutation to the tiles and, if this method was triggered from the
-  //  player's own field, notify the server.
-  opponentTileSwap(id: string, tileSwap: any): void {
-    let player = this.getPlayer(id);
+  private swapPlayerTiles(player: Client, swap: any): void {
     let tile1Index = player.tiles.findIndex((tile) => {
-      return tile.id === tileSwap.from;
+      return tile.id === swap.from;
     });
     let tile2Index = player.tiles.findIndex((tile) => {
-      return tile.id === tileSwap.to;
+      return tile.id === swap.to;
     });
 
     // make deep clone of tiles
@@ -223,6 +179,36 @@ export class AppComponent {
     // todo: instead of reassigning the whole array
     player.setTiles(tilesCopy);
     player.tileSwaps++;
+  }
+
+  // A player has swapped two tiles
+  //  Apply the mutation to the tiles and, if this method was triggered from the
+  //  player's own field, notify the server.
+  tileSwap(args: any): void {
+    if (this.celebrations) {
+      // the game is over, no more swaps!
+      return;
+    }
+
+    this.swapPlayerTiles(this.self, args.tileSwap);
+
+    this.sendMessage(
+      {
+        event:      'player_tile_swap',
+        client_id:  this.self.id,
+        tile_swap:  args.tileSwap,
+        tile_swaps: this.self.tileSwaps,
+        game_id:    this.gameId
+      }
+    );
+  }
+
+  // A player has swapped two tiles
+  //  Apply the mutation to the tiles and, if this method was triggered from the
+  //  player's own field, notify the server.
+  opponentTileSwap(id: string, swap: any): void {
+    let player = this.getPlayer(id);
+    this.swapPlayerTiles(player, swap);
   }
 
   // A player has left the game or forfeited
@@ -282,7 +268,7 @@ export class AppComponent {
 
   // Set the state and thusly the screen to display
   // todo: refactor and add/remove screen component
-  private setState(state): void {
+  private setState(state: string): void {
     this.splash = false;
     this.select = false;
     this.lobby  = false;
@@ -334,7 +320,7 @@ export class AppComponent {
   }
 
   // The player clicks the 'New game' button
-  newGame(args): void {
+  newGame(args: any): void {
     this.sendMessage(
       {
         event:       'start_new_game',
@@ -407,7 +393,7 @@ export class AppComponent {
   }
 
   // The player joins a game
-  joinGame(args) : void {
+  joinGame(args: any) : void {
     this.sendMessage(
       {
         event:       'player_join_game',
@@ -419,7 +405,7 @@ export class AppComponent {
   }
 
   // The player sends a chat message
-  sendChatMessage(chatMessage): void {
+  sendChatMessage(chatMessage: string): void {
     this.sendMessage({
       event:        'game_chat_message',
       client_id:    this.self.id,
@@ -430,7 +416,7 @@ export class AppComponent {
   }
 
   // The player sends a global chat message
-  sendGlobalChatMessage(chatMessage): void {
+  sendGlobalChatMessage(chatMessage: string): void {
     this.sendMessage({
       event:        'global_chat_message',
       client_id:    this.self.id,

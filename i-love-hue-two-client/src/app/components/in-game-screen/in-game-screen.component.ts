@@ -1,5 +1,5 @@
-import {Component, EventEmitter, Input, Output} from '@angular/core';
-import { Client } from '../../../../../i-love-hue-two-server/models/client.class';
+import { Component, EventEmitter, Input, Output } from '@angular/core';
+import { Client }                                 from '../../../../../i-love-hue-two-server/models/client.class';
 
 @Component({
   selector: 'in-game-screen',

@@ -1,5 +1,5 @@
-import {Component, Input, Output, EventEmitter} from '@angular/core';
-import { Client } from '../../../../../i-love-hue-two-server/models/client.class';
+import { Component, Input, Output, EventEmitter } from '@angular/core';
+import { Client }                                 from '../../../../../i-love-hue-two-server/models/client.class';
 
 @Component({
   selector: 'play-field',
