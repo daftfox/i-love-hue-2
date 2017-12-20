@@ -14,6 +14,7 @@ export class WebsocketService {
       this.ws.onmessage = observer.next.bind(observer);
       this.ws.onerror = observer.error.bind(observer);
       this.ws.onclose = observer.complete.bind(observer);
+
       return this.ws.close.bind(this.ws);
     });
 

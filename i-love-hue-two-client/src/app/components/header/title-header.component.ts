@@ -1,4 +1,4 @@
-import { Component } from '@angular/core';
+import { Component, Input, OnInit } from '@angular/core';
 
 @Component({
   selector: 'title-header',
@@ -8,6 +8,14 @@ import { Component } from '@angular/core';
   ]
 })
 
-export class TitleHeaderComponent {
+export class TitleHeaderComponent implements OnInit {
+  @Input() subtitle: string;
 
+  subtitleCharacters: Array<string>;
+
+  constructor() {}
+
+  ngOnInit() {
+    this.subtitleCharacters = Array.from(this.subtitle)
+  }
 }

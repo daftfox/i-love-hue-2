@@ -18,5 +18,4 @@ export class WelcomeScreenComponent {
   connectToServer(name: string, url: string): void {
     this.connect.emit({name: name, url: url});
   }
-  
 }

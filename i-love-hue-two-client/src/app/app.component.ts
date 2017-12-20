@@ -27,6 +27,7 @@ import { Helper }         from '../../../i-love-hue-two-server/models/helper.cla
 
 export class AppComponent {
   defaultUrl                      = 'ws://timothy.fyi:8999';
+  subtitle                        = 'MULTIPLAYER';
   startTime                       = '';
   countdown                       = '';
   globalMessages:   Array<any>    = [];

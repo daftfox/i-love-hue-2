@@ -5,7 +5,8 @@
          [ngClass]="{'col-lg-6': splash || select || lobby, 'col-lg-9': play}">
       <div class="row justify-content-center"
            *ngIf="!play && !lobby">
-        <title-header></title-header>
+        <title-header [subtitle]="subtitle">
+        </title-header>
       </div>
       <welcome-screen *ngIf="splash"
                       (connect)="connectToServer($event)">
