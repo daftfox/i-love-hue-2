@@ -33,7 +33,7 @@ Mac: **untested!**
 npm run start_stack_mac
 ```
 Two terminals should pop up setting up and starting both the client and server app. Have a cup of coffee while this
-takes place. Both apps should be up and running whithin ten minutes.
+takes place. Both apps should be up and running within ten minutes.
 
 ### Starting a game
 If you want to run a game using the default server, no custom server url has to be supplied.
