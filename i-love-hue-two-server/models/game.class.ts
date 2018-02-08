@@ -23,12 +23,11 @@ export class Game {
     clients:          Client[]   = [];
     chatMessages:     Array<any> = [];
     status:           number;
-    time:             number;
+    time:             number = 0;
     difficulty:       number;
     clock:            any;
     timeout:          any;
     websocketService: WebsocketService;
-    im:               ImmutableMask;
 
     public static GAMEMODE = [
         new GameMode(8, 8),             // easy
@@ -90,16 +89,16 @@ export class Game {
         }
     }
 
-    public startClock(): void {
+    /*public startClock(): void {
         this.time = 0;
         this.clock = setInterval(() => {
             this.time++;
         }, 1000);
-    }
+    }*/
 
-    public stopClock(): void {
+    /*public stopClock(): void {
         clearInterval(this.clock);
-    }
+    }*/
 
     public swapTiles(clientId: string, tileSwap: any, playerVictory: any): void {
         let client = this.getClient(clientId);

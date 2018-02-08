@@ -10,10 +10,10 @@ export class Map {
     private colorBottomLeft:      string;
     private colorBottomRight:     string;
     
-    public  tiles:                Tile[];
-    public  solution:             Tile[];
+    public  tiles:                Tile[] = [];
+    public  solution:             Tile[] = [];
     public  immutableMask:        ImmutableMask;
-    private gradientMap:          Array<any>;
+    private gradientMap:          Array<any> = [];
 
     constructor(rows:             number,
                 columns:          number,

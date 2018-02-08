@@ -5,7 +5,7 @@ import { Helper }     from './helper.class';
 export class Client {
     id:         string;
     name?:      string;
-    tiles:      Tile[];
+    tiles:      Tile[] = [];
     tileSwaps:  number;
     status:     number;
     score:      number;
