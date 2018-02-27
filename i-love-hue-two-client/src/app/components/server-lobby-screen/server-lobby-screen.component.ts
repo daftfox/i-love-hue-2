@@ -13,8 +13,8 @@ export class ServerLobbyScreenComponent {
   @Output()  startNew  = new EventEmitter();
   @Output()  join      = new EventEmitter();
 
-  difficulty    = 0;
-  mode          = 0;
+  mask          = 0;
+  size          = 0;
   name:         string;
   selectedGame: string;
 
@@ -22,7 +22,7 @@ export class ServerLobbyScreenComponent {
     this.join.emit({game: selectedGame});
   }
 
-  newGame(name, difficulty, mode): void{
-    this.startNew.emit({name: name, difficulty: difficulty, mode: mode});
+  newGame(name, mask, size): void{
+    this.startNew.emit({name: name, mask: mask, size: size});
   }
 }

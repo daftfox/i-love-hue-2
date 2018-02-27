@@ -138,14 +138,14 @@ export class ImmutableMask {
     /*
      * Borders only pattern
      *  --------------------
-     *  |   |   |   |   |   |
+     *  | x |   |   |   | x |
      *  |   | x | x | x |   |
      *  |   | x | x | x |   |
      *  |   | x | x | x |   |
      *  |   | x | x | x |   |
      *  |   | x | x | x |   |
      *  |   | x | x | x |   |
-     *  |   |   |   |   |   |
+     *  | x |   |   |   | x |
      *  ---------------------
      */
 
@@ -155,6 +155,13 @@ export class ImmutableMask {
         for (y; y <= this.rows; y++) {
           if ((y !== 1 && y !== this.rows) &&
               (x !== 1 && x !== this.columns)) {
+            mask.push({x: x, y: y});
+          }
+
+          if ((y === 1 && x === 1)            ||
+              (y === this.rows && x === 1)    ||
+              (y === 1 && x === this.columns) ||
+              (y === this.rows && x === this.columns)) {
             mask.push({x: x, y: y});
           }
         }
