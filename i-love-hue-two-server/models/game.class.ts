@@ -5,7 +5,7 @@ import { Client }           from './client.class';
 import { ImmutableMask }    from './immutable-mask.class';
 import { Helper }           from './helper.class';
 
-export class GameMode {
+export class BoardSize {
     rows:    number;
     columns: number;
 
@@ -19,20 +19,24 @@ export class Game {
     id:               string;
     name:             string;
     map:              Map;
-    mode:             GameMode;
+    size:             BoardSize;
     clients:          Client[]   = [];
     chatMessages:     Array<any> = [];
     status:           number;
     time:             number = 0;
-    difficulty:       number;
+    mask:             number;
     clock:            any;
     timeout:          any;
     websocketService: WebsocketService;
 
-    public static GAMEMODE = [
-        new GameMode(8, 8),             // easy
-        new GameMode(10, 10),           // medium
-        new GameMode(15, 15)            // hard
+    public static BOARDSIZES = [
+        new BoardSize(8, 8),             // smallest
+        new BoardSize(10, 10),           // small
+        new BoardSize(15, 15),           // normal
+        new BoardSize(20, 20),           // large
+        new BoardSize(25, 25),           // largest
+        new BoardSize(30, 30),           // Hardcore
+        new BoardSize(40, 40)            // Oh god, the colors (not for mobile)
     ];
 
     private static COLORSETS = [
@@ -46,14 +50,14 @@ export class Game {
         ['#5C2AE2', '#F85C66', '#3BDCCC', '#F2C93B']
     ];
 
-    constructor(mode:             number,
+    constructor(size:             number,
                 name:             string,
                 websocketService: WebsocketService,
-                difficulty:       number) {
+                mask:             number) {
         this.name             = name || 'Game'+Helper.rng(0, 99);
-        this.mode             = Game.GAMEMODE[mode];
+        this.size             = Game.BOARDSIZES[size];
         this.websocketService = websocketService;
-        this.difficulty       = difficulty;
+        this.mask             = mask;
         this.map              = this.generateMap();
         this.status           = 0;
         this.id               = Helper.generateId();
@@ -61,9 +65,9 @@ export class Game {
 
     public generateMap(): Map {
         return new Map(
-            this.mode.rows,
-            this.mode.columns,
-            new ImmutableMask(this.mode.rows, this.mode.columns, this.difficulty),
+            this.size.rows,
+            this.size.columns,
+            new ImmutableMask(this.size.rows, this.size.columns, this.mask),
             ...Game.COLORSETS[Helper.rng(0, Game.COLORSETS.length - 1)]
         );
     }

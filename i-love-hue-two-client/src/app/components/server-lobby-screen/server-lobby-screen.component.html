@@ -6,22 +6,26 @@
     </div>
 
     <div class="col-6 text-center m-t-3">
-      <div>Game difficulty: </div>
-      <input class="" type="radio" [value]="0" name="difficulty" [(ngModel)]="difficulty" /> Easy
-      <input class="" type="radio" [value]="1" name="difficulty" [(ngModel)]="difficulty" /> Medium
-      <input class="" type="radio" [value]="2" name="difficulty" [(ngModel)]="difficulty" /> Difficult
+      <div>Mask: </div>
+      <input class="" type="radio" [value]="0" name="mask" [(ngModel)]="mask" /> Borders only
+      <input class="" type="radio" [value]="1" name="mask" [(ngModel)]="mask" /> No borders
+      <input class="" type="radio" [value]="2" name="mask" [(ngModel)]="mask" /> Four corners
     </div>
 
     <div class="col-6 text-center m-t-3">
       <div>Board size: </div>
-      <input class="" type="radio" [value]="0" name="mode" [(ngModel)]="mode" /> 8x8
-      <input class="" type="radio" [value]="1" name="mode" [(ngModel)]="mode" /> 10x10
-      <input class="" type="radio" [value]="2" name="mode" [(ngModel)]="mode" /> 15x15
+      <input class="" type="radio" [value]="0" name="size" [(ngModel)]="size" /> 8x8 Smallest
+      <input class="" type="radio" [value]="1" name="size" [(ngModel)]="size" /> 10x10 Small
+      <input class="" type="radio" [value]="2" name="size" [(ngModel)]="size" /> 15x15 Normal
+      <input class="" type="radio" [value]="3" name="size" [(ngModel)]="size" /> 20x20 Large
+      <input class="" type="radio" [value]="4" name="size" [(ngModel)]="size" /> 25x25 Largest
+      <input class="" type="radio" [value]="5" name="size" [(ngModel)]="size" /> 30x30 Hardcore
+      <input class="" type="radio" [value]="6" name="size" [(ngModel)]="size" /> 40x40 Oh God, the colors
     </div>
 
     <div class="col-12 text-center m-t-3">
       <button class="btn btn-lg btn-outline-primary"
-              (click)="newGame(name, difficulty, mode)">
+              (click)="newGame(name, mask, size)">
         <span>New game</span>
       </button>
     </div>

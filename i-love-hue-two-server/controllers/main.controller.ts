@@ -296,7 +296,7 @@ export class MainController {
     //  Create a new Game object, add it to the websocketService, add the new player to the game and notify its players
     private startNewGame(message: any): void {
         // create a new game
-        let newGame = new Game(message.game.mode, message.game.name, this.websocketService, message.game.difficulty);
+        let newGame = new Game(message.game.size, message.game.name, this.websocketService, message.game.mask);
         this.games.push(newGame);
         this.websocketService.games.push(newGame);
 

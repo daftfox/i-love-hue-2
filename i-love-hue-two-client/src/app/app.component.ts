@@ -134,7 +134,7 @@ export class AppComponent {
       }
     } else {
       let newPlayer = new Client(message.client_name);
-      newPlayer.id = message.client_id;
+      newPlayer.id  = message.client_id;
       newPlayer.setTiles(message.client_tiles);
       newPlayer.setStatus(message.client_status);
 
@@ -328,9 +328,9 @@ export class AppComponent {
         client_id:   this.self.id,
         client_name: this.self.name,
         game: {
-          name:       args.name,
-          mode:       args.mode,
-          difficulty: args.difficulty
+          name: args.name,
+          size: args.size,
+          mask: args.mask
         }
       }
     );
